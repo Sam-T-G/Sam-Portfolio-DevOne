@@ -1,0 +1,213 @@
+@import "tailwindcss";
+
+:root {
+  /* Canvas Aesthetic - Clean, Modern */
+  --canvas-white: #FAFAF9;
+  --canvas-cream: #F5F5F4;
+  --ink-black: #0A0A0A;
+  --charcoal: #27272A;
+  --slate: #71717A;
+  
+  /* Backgrounds */
+  --bg-canvas: #FAFAF9;
+  --bg-paper: #FFFFFF;
+  --bg-subtle: #F5F5F4;
+  
+  /* Accent Colors (Refined) */
+  --accent-teal: #0891B2;
+  --accent-amber: #F59E0B;
+  --accent-rose: #E11D48;
+  --accent-emerald: #10B981;
+  
+  /* Brand Colors */
+  --brand-teal: #0891B2;
+  --brand-mint: #10B981;
+  --brand-orange: #F59E0B;
+  
+  /* Text Colors - High Contrast */
+  --text-primary: #0A0A0A;
+  --text-secondary: #27272A;
+  --text-tertiary: #71717A;
+  --text-inverse: #FAFAF9;
+  
+  /* Semantic */
+  --background: var(--bg-canvas);
+  --foreground: var(--ink-black);
+  
+  /* Spacing (8px base) */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-24: 6rem;
+  --space-32: 8rem;
+  
+  /* Typography */
+  --font-display: 'Space Grotesk', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  /* Borders */
+  --border-width: 2px;
+  --border-color: var(--ink-black);
+  
+  /* Shadows (Hard, Neubrutalism) */
+  --shadow-sm: 2px 2px 0 var(--ink-black);
+  --shadow-md: 4px 4px 0 var(--ink-black);
+  --shadow-lg: 6px 6px 0 var(--ink-black);
+  --shadow-xl: 8px 8px 0 var(--ink-black);
+  
+  /* Radius (Minimal) */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-full: 9999px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@layer utilities {
+  /* Text Color Utilities */
+  .text-primary { color: var(--text-primary); }
+  .text-secondary { color: var(--text-secondary); }
+  .text-tertiary { color: var(--text-tertiary); }
+  .text-inverse { color: var(--text-inverse); }
+  
+  /* Brand Color Utilities */
+  .text-brand-teal { color: var(--brand-teal); }
+  .text-brand-mint { color: var(--brand-mint); }
+  .text-brand-orange { color: var(--brand-orange); }
+  
+  .bg-brand-teal { background-color: var(--brand-teal); }
+  .bg-brand-mint { background-color: var(--brand-mint); }
+  .bg-brand-orange { background-color: var(--brand-orange); }
+  
+  .border-brand-teal { border-color: var(--brand-teal); }
+  .border-brand-mint { border-color: var(--brand-mint); }
+  .border-brand-orange { border-color: var(--brand-orange); }
+}
+
+@layer components {
+  /* Buttons - Neubrutalism Style */
+  .btn {
+    @apply inline-flex items-center justify-center;
+    font-weight: 600;
+    padding: var(--space-3) var(--space-6);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-sm);
+    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.875rem;
+    cursor: pointer;
+  }
+  
+  .btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: none;
+  }
+  
+  .btn-primary {
+    background: var(--accent-teal);
+    color: white;
+    border-color: var(--ink-black);
+  }
+  
+  .btn-secondary {
+    background: var(--bg-paper);
+    color: var(--ink-black);
+    border-color: var(--ink-black);
+  }
+
+  /* Cards - Clean with Hard Shadow */
+  .card {
+    background: var(--bg-paper);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
+    padding: var(--space-8);
+    transition: all 0.2s ease;
+  }
+  
+  .card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+
+  /* Badges - Pill Style */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--space-1) var(--space-3);
+    border: var(--border-width) solid var(--border-color);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--canvas-cream);
+    color: var(--ink-black);
+  }
+  
+  .badge-accent {
+    background: var(--accent-teal);
+    color: white;
+    border-color: var(--ink-black);
+  }
+
+  /* Progress Bar - Simplified */
+  .progress-bar {
+    background: linear-gradient(
+      90deg,
+      var(--accent-teal),
+      var(--accent-amber)
+    );
+  }
+  
+  /* Section Containers */
+  .section {
+    padding: var(--space-24) var(--space-6);
+    position: relative;
+  }
+  
+  .section-canvas {
+    background: var(--bg-canvas);
+  }
+  
+  .section-cream {
+    background: var(--bg-subtle);
+  }
+}
+
+/* Dark mode removed - unified light theme experience */
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Canvas Texture */
+.canvas-texture {
+  position: relative;
+}
+
+.canvas-texture::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.03'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  pointer-events: none;
+  opacity: 0.5;
+}
