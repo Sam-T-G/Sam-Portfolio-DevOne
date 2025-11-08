@@ -3,6 +3,7 @@ import { useRef, useState } from "react";
 import { useScroll, motion } from "framer-motion";
 import PermanentSceneBackground from "@/components/canvas/PermanentSceneBackground";
 import EscapeButton from "@/components/ui/EscapeButton";
+import HUDManager from "@/components/canvas/HUDManager";
 
 // Project data for unified 3D space
 const projects = [
@@ -36,6 +37,9 @@ export default function Home() {
       
       {/* ESC Button - Only in project highlight mode */}
       <EscapeButton show={isFocused} />
+
+      {/* Game-style HUD System */}
+      <HUDManager />
 
       {/* Scroll Progress Indicator */}
       <motion.div

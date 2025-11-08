@@ -1,8 +1,22 @@
 "use client";
 import { useRef, useState, useEffect } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, useThree } from '@react-three/fiber';
 import { Html, Line } from '@react-three/drei';
 import * as THREE from 'three';
+
+// Utility to project 3D position to 2D screen coordinates
+function project3DTo2D(
+  position: THREE.Vector3,
+  camera: THREE.Camera,
+  width: number,
+  height: number
+): { x: number; y: number } {
+  const vector = position.clone().project(camera);
+  return {
+    x: (vector.x * 0.5 + 0.5) * width,
+    y: (-(vector.y * 0.5) + 0.5) * height,
+  };
+}
 
 interface Project {
   id: number;
@@ -15,68 +29,63 @@ interface Project {
 interface ProjectConstellationProps {
   projects: Project[];
   activeSection: string;
-  sectionProgress: number;
   onProjectClick?: (project: Project) => void;
-  focusedProjectId?: number | null;
   onProjectFocus?: (project: Project | null, position: [number, number, number]) => void;
   resetTrigger?: boolean;
 }
 
-// Different polyhedron types for variety - LARGER for visibility
+// Different polyhedron types for variety - REFINED SCALE
 const GEOMETRIES = [
-  { type: 'tetrahedron', args: [1.4, 0] },
-  { type: 'icosahedron', args: [1.3, 0] },
-  { type: 'octahedron', args: [1.5, 0] },
-  { type: 'dodecahedron', args: [1.2, 0] },
+  { type: 'tetrahedron', args: [0.8, 0] },
+  { type: 'icosahedron', args: [0.75, 0] },
+  { type: 'octahedron', args: [0.85, 0] },
+  { type: 'dodecahedron', args: [0.7, 0] },
 ];
+
+// Stable orbital configuration for projects
+const PROJECT_ORBIT_CONFIG = {
+  radius: 6,           // Fixed distance from centerpiece
+  height: 0,           // Y-position (level with centerpiece)
+  speed: 0.05,         // Consistent orbital speed
+  bobIntensity: 0.15,  // Subtle vertical bobbing
+  bobSpeed: 0.8,       // Bob frequency
+};
 
 export default function ProjectConstellation({
   projects,
   activeSection,
-  sectionProgress,
   onProjectClick,
-  focusedProjectId,
   onProjectFocus,
   resetTrigger,
 }: ProjectConstellationProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
+  const [pendingActivation, setPendingActivation] = useState<number | null>(null);
   const [opacity, setOpacity] = useState(0);
   const currentPositionsRef = useRef<Map<number, [number, number, number]>>(new Map());
   const scaleRef = useRef<Map<number, number>>(new Map());
   const meshRefs = useRef<Map<number, THREE.Mesh>>(new Map());
+  const { camera, size } = useThree();
 
-  // Viewport constraints - keep projects within visible bounds
-  const VIEWPORT_BOUNDS = {
-    x: { min: -10, max: 10 },
-    y: { min: -3, max: 4 },
-    z: { min: -10, max: 10 },
-  };
-
-  // Calculate orchestrated positions based on scroll progress
+  // Calculate stable orbital positions - evenly spaced, predictable paths
   const projectOrbits = projects.map((_, index) => {
+    // Even distribution around orbit (0°, 90°, 180°, 270°)
     const baseAngle = (index / projects.length) * Math.PI * 2;
-    const baseRadius = 5 + Math.sin(index * 1.2) * 0.8; // Slightly tighter
-    const baseHeight = Math.cos(index * 0.8) * 1.2;
-    const speed = 0.06 + index * 0.025;
     
-    // Create unique trajectory for each project based on scroll
-    // Projects follow elegant paths as user scrolls through projects section
-    const trajectoryOffset = Math.sin(sectionProgress * Math.PI * 2 + index) * 2;
-    const heightOffset = Math.cos(sectionProgress * Math.PI + index * 0.5) * 1;
+    // Each project gets slight phase offset for bob timing variety
+    const bobPhase = index * (Math.PI / 2);
     
     return {
       position: [
-        Math.cos(baseAngle) * baseRadius,
-        baseHeight,
-        Math.sin(baseAngle) * baseRadius,
+        Math.cos(baseAngle) * PROJECT_ORBIT_CONFIG.radius,
+        PROJECT_ORBIT_CONFIG.height,
+        Math.sin(baseAngle) * PROJECT_ORBIT_CONFIG.radius,
       ] as [number, number, number],
       angle: baseAngle,
-      radius: baseRadius,
-      speed,
-      trajectoryOffset,
-      heightOffset,
+      radius: PROJECT_ORBIT_CONFIG.radius,
+      speed: PROJECT_ORBIT_CONFIG.speed,
+      bobPhase,
       geometry: GEOMETRIES[index % GEOMETRIES.length],
     };
   });
@@ -85,8 +94,8 @@ export default function ProjectConstellation({
     if (!groupRef.current) return;
 
     const isProjectsSection = activeSection === 'projects';
-    // Always visible, but more prominent in projects section
-    const targetOpacity = isProjectsSection ? 1 : 0.6;
+    // Always visible - subtle in other sections, prominent in projects
+    const targetOpacity = isProjectsSection ? 1 : 0.35;
     
     // Smooth opacity transition
     setOpacity(prevOpacity => THREE.MathUtils.lerp(
@@ -107,9 +116,10 @@ export default function ProjectConstellation({
         const orbit = projectOrbits[index];
         const isHovered = hoveredIndex === index;
         const isActive = activeIndex === index;
+        const isPending = pendingActivation === index;
         
-        // When active (focused), stop rotation and bob gently
-        if (isActive) {
+        // When active or pending (focused), stop rotation and bob gently
+        if (isActive || isPending) {
           // Freeze rotation (don't update, stays at current angles)
           // This creates stillness for focused state
           
@@ -123,7 +133,7 @@ export default function ProjectConstellation({
           child.position.x += swayX * 0.01;
           child.position.z += swayZ * 0.01;
         } else {
-          // Normal rotation when not focused
+          // Consistent rotation for all polyhedrons
           child.rotation.x = state.clock.elapsedTime * 0.3;
           child.rotation.y = state.clock.elapsedTime * 0.5;
           
@@ -132,42 +142,31 @@ export default function ProjectConstellation({
             child.rotation.y += Math.sin(state.clock.elapsedTime * 2) * 0.1;
           }
           
-          // Orchestrated movement with scroll-based choreography
+          // STABLE ORBITAL MOTION - predictable circular path
           const time = state.clock.elapsedTime * orbit.speed;
-          const newAngle = orbit.angle + time;
+          const currentAngle = orbit.angle + time;
           
-          // Base orbital position
-          let newX = Math.cos(newAngle) * orbit.radius;
-          let newZ = Math.sin(newAngle) * orbit.radius;
-          
-          // Add scroll-based trajectory variation (elegant paths)
-          if (isProjectsSection) {
-            newX += orbit.trajectoryOffset * sectionProgress;
-            newZ += orbit.trajectoryOffset * (1 - sectionProgress) * 0.5;
-          }
-          
-          // Apply viewport constraints - clamp positions
-          newX = THREE.MathUtils.clamp(newX, VIEWPORT_BOUNDS.x.min, VIEWPORT_BOUNDS.x.max);
-          newZ = THREE.MathUtils.clamp(newZ, VIEWPORT_BOUNDS.z.min, VIEWPORT_BOUNDS.z.max);
+          // Calculate position on circular orbit
+          const newX = Math.cos(currentAngle) * orbit.radius;
+          const newZ = Math.sin(currentAngle) * orbit.radius;
           
           // Smooth position update
-          child.position.x = THREE.MathUtils.lerp(child.position.x, newX, 0.05);
-          child.position.z = THREE.MathUtils.lerp(child.position.z, newZ, 0.05);
+          child.position.x = THREE.MathUtils.lerp(child.position.x, newX, 0.08);
+          child.position.z = THREE.MathUtils.lerp(child.position.z, newZ, 0.08);
           
-          // Floating Y movement with scroll-based height variation
-          let floatY = orbit.position[1] + Math.sin(time * 0.5) * 0.3;
-          if (isProjectsSection) {
-            floatY += orbit.heightOffset * sectionProgress;
-          }
-          floatY = THREE.MathUtils.clamp(floatY, VIEWPORT_BOUNDS.y.min, VIEWPORT_BOUNDS.y.max);
-          child.position.y = THREE.MathUtils.lerp(child.position.y, floatY, 0.05);
+          // Subtle vertical bobbing - each project has unique phase
+          const bobTime = state.clock.elapsedTime * PROJECT_ORBIT_CONFIG.bobSpeed + orbit.bobPhase;
+          const bobOffset = Math.sin(bobTime) * PROJECT_ORBIT_CONFIG.bobIntensity;
+          const targetY = PROJECT_ORBIT_CONFIG.height + bobOffset;
+          
+          child.position.y = THREE.MathUtils.lerp(child.position.y, targetY, 0.08);
         }
         
         // Store current position for camera focusing
         currentPositionsRef.current.set(index, [child.position.x, child.position.y, child.position.z]);
         
         // Smooth scale interpolation with easing curve
-        const targetScale = isActive ? 1.5 : isHovered ? 1.2 : 1;
+        const targetScale = isActive ? 1.5 : isPending ? 1.3 : isHovered ? 1.2 : 1;
         const currentScale = scaleRef.current.get(index) || 1;
         
         // Ease-out cubic curve for smooth animation
@@ -190,14 +189,52 @@ export default function ProjectConstellation({
       const timer = setTimeout(() => {
         setActiveIndex(null);
         setHoveredIndex(null);
+        setPendingActivation(null);
       }, 0);
       return () => clearTimeout(timer);
     }
   }, [resetTrigger, activeIndex]);
 
+  // Activate pending project when we arrive at projects section
+  useEffect(() => {
+    if (activeSection === 'projects' && pendingActivation !== null) {
+      // Small delay to ensure smooth transition
+      const timer = setTimeout(() => {
+        const project = projects[pendingActivation];
+        setActiveIndex(pendingActivation);
+        if (onProjectFocus) {
+          const position = currentPositionsRef.current.get(pendingActivation) || [
+            projectOrbits[pendingActivation]?.position[0] || 0,
+            projectOrbits[pendingActivation]?.position[1] || 0,
+            projectOrbits[pendingActivation]?.position[2] || 0,
+          ];
+          onProjectFocus(project, position);
+        }
+        setPendingActivation(null);
+      }, 300); // Delay for smooth scroll completion
+      return () => clearTimeout(timer);
+    }
+  }, [activeSection, pendingActivation, projects, onProjectFocus, projectOrbits]);
+
   const handleClick = (index: number) => {
     const project = projects[index];
     
+    // If not in projects section, set pending activation and navigate
+    if (activeSection !== 'projects') {
+      // Store which project should be activated
+      setPendingActivation(index);
+      
+      // Scroll to projects section smoothly
+      const vh = window.innerHeight;
+      window.scrollTo({
+        top: vh, // Projects section starts at 1vh
+        behavior: 'smooth'
+      });
+      // The useEffect will handle activation once we arrive
+      return;
+    }
+    
+    // In projects section: handle focus/open behavior
     if (activeIndex === index) {
       // Second click - open link
       if (onProjectClick) {
@@ -218,14 +255,13 @@ export default function ProjectConstellation({
     }
   };
 
-  const isVisible = activeSection === 'projects';
-
   return (
-    <group ref={groupRef} visible={isVisible}>
+    <group ref={groupRef}>
       {projects.map((project, index) => {
         const orbit = projectOrbits[index];
         const isHovered = hoveredIndex === index;
         const isActive = activeIndex === index;
+        const isPending = pendingActivation === index; // Check if this project is pending activation
         const GeometryComponent = orbit.geometry.type;
 
         return (
@@ -234,17 +270,17 @@ export default function ProjectConstellation({
             position={orbit.position}
           >
             {/* Connection line to center */}
-            {(isHovered || isActive) && (
+            {(isHovered || isActive || isPending) && (
               <Line
                 points={[
                   [0, 0, 0],
                   [-orbit.position[0], -orbit.position[1], -orbit.position[2]],
                 ]}
                 color={project.color}
-                lineWidth={isActive ? 2 : 1}
+                lineWidth={isActive ? 2 : isPending ? 1.5 : 1}
                 transparent
-                opacity={opacity * (isActive ? 0.6 : 0.3)}
-                dashed={!isActive}
+                opacity={opacity * (isActive ? 0.6 : isPending ? 0.5 : 0.3)}
+                dashed={!(isActive || isPending)}
                 dashScale={2}
                 gapSize={0.5}
               />
@@ -255,13 +291,50 @@ export default function ProjectConstellation({
               onPointerOver={(e) => {
                 e.stopPropagation();
                 setHoveredIndex(index);
+                
+                // Show game HUD with 2D screen position
+                const position = currentPositionsRef.current.get(index) || orbit.position;
+                const worldPos = new THREE.Vector3(position[0], position[1], position[2]);
+                const screenPos = project3DTo2D(worldPos, camera, size.width, size.height);
+                const distance = Math.sqrt(
+                  position[0] ** 2 + position[1] ** 2 + position[2] ** 2
+                );
+                
+                window.dispatchEvent(new CustomEvent('show-hud', {
+                  detail: {
+                    targetName: project.title,
+                    targetType: 'project',
+                    subtitle: project.subtitle,
+                    description: `Advanced ${project.subtitle.toLowerCase()} leveraging cutting-edge technology.`,
+                    status: 'AVAILABLE',
+                    distance,
+                    coordinates: { x: position[0], y: position[1], z: position[2] },
+                    metadata: {
+                      'Type': GeometryComponent,
+                      'Status': isPending ? 'LOADING' : isActive ? 'FOCUSED' : 'IDLE',
+                      'Index': `#${String(index + 1).padStart(2, '0')}`,
+                    },
+                    actionHint: activeSection === 'projects' && isActive 
+                      ? 'CLICK TO VISIT PROJECT' 
+                      : activeSection === 'projects'
+                      ? 'CLICK TO FOCUS'
+                      : 'CLICK TO NAVIGATE',
+                    color: project.color,
+                    position: screenPos,
+                  }
+                }));
               }}
               onPointerOut={(e) => {
                 e.stopPropagation();
                 setHoveredIndex(null);
+                
+                // Hide game HUD
+                window.dispatchEvent(new CustomEvent('hide-hud'));
               }}
               onClick={(e) => {
                 e.stopPropagation();
+                // Unlock HUD before handling click
+                window.dispatchEvent(new CustomEvent('unlock-hud'));
                 handleClick(index);
               }}
               ref={(mesh) => {
@@ -289,15 +362,15 @@ export default function ProjectConstellation({
                 wireframeLinewidth={3}
                 emissive={project.color}
                 emissiveIntensity={
-                  isActive ? 1.2 : isHovered ? 0.8 : 0.4
+                  isActive ? 1.2 : isPending ? 1.0 : isHovered ? 0.8 : 0.4
                 }
                 transparent
-                opacity={opacity * (isActive ? 1 : isHovered ? 0.95 : 0.85)}
+                opacity={opacity * (isActive ? 1 : isPending ? 0.98 : isHovered ? 0.95 : 0.85)}
               />
             </mesh>
 
             {/* Outer glow shell - ALWAYS visible for prominence */}
-            <mesh scale={isActive ? 2.0 : isHovered ? 1.6 : 1.3}>
+            <mesh scale={isActive ? 2.0 : isPending ? 1.8 : isHovered ? 1.6 : 1.3}>
                 {GeometryComponent === 'tetrahedron' && (
                   <tetrahedronGeometry args={orbit.geometry.args as [number, number]} />
                 )}
@@ -315,27 +388,27 @@ export default function ProjectConstellation({
                   color={project.color}
                   wireframe
                   transparent
-                  opacity={opacity * (isActive ? 0.4 : isHovered ? 0.25 : 0.12)}
+                  opacity={opacity * (isActive ? 0.4 : isPending ? 0.35 : isHovered ? 0.25 : 0.12)}
                 />
               </mesh>
 
             {/* Ambient light - always present for visibility */}
             <pointLight
               color={project.color}
-              intensity={isActive ? 2.5 : isHovered ? 1.2 : 0.5}
+              intensity={isActive ? 2.5 : isPending ? 1.5 : isHovered ? 1.2 : 0.5}
               distance={10}
               decay={2}
             />
 
-            {/* Holographic info panel - Always upright */}
-            {(isHovered || isActive) && (
+            {/* Holographic info panel - Show on hover, active, or pending */}
+            {(isHovered || isActive || isPending) && (
               <Html
                 center
                 distanceFactor={6}
                 position={[0, 2, 0]}
                 sprite
                 style={{
-                  transition: 'opacity 0.3s ease',
+                  transition: 'all 0.3s ease',
                   pointerEvents: 'none',
                 }}
               >
@@ -348,10 +421,11 @@ export default function ProjectConstellation({
                     border: `1px solid ${project.color}40`,
                     boxShadow: `0 8px 32px ${project.color}30`,
                     minWidth: '160px',
-                    opacity: opacity,
+                    opacity: opacity * (isPending ? 0.9 : 1),
+                    transform: (isActive || isPending) ? 'scale(1.05)' : 'scale(1)',
                   }}
                 >
-                  {/* Title */}
+                  {/* Title - Always shown when visible */}
                   <h3 
                     className="text-sm font-bold tracking-tight"
                     style={{
@@ -362,7 +436,7 @@ export default function ProjectConstellation({
                     {project.title}
                   </h3>
                   
-                  {/* Subtitle */}
+                  {/* Subtitle - Always shown when visible */}
                   <p 
                     className="text-xs font-medium"
                     style={{
@@ -382,7 +456,18 @@ export default function ProjectConstellation({
                   />
 
                   {/* Action hint */}
-                  {isActive ? (
+                  {isPending ? (
+                    <p 
+                      className="text-[10px] font-semibold animate-pulse"
+                      style={{
+                        color: project.color,
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.1em',
+                      }}
+                    >
+                      🚀 Navigating...
+                    </p>
+                  ) : activeSection === 'projects' && isActive ? (
                     <p 
                       className="text-[10px] font-semibold animate-pulse"
                       style={{
@@ -403,15 +488,15 @@ export default function ProjectConstellation({
                         letterSpacing: '0.1em',
                       }}
                     >
-                      Click to focus
+                      Click to view projects
                     </p>
                   )}
                 </div>
               </Html>
             )}
 
-            {/* Particle burst on active */}
-            {isActive && (
+            {/* Particle burst on active or pending */}
+            {(isActive || isPending) && (
               <group>
                 {Array.from({ length: 12 }).map((_, i) => {
                   const particleAngle = (i / 12) * Math.PI * 2;
@@ -429,7 +514,7 @@ export default function ProjectConstellation({
                       <meshBasicMaterial
                         color={project.color}
                         transparent
-                        opacity={opacity * 0.6}
+                        opacity={opacity * (isPending ? 0.4 : 0.6)}
                       />
                     </mesh>
                   );

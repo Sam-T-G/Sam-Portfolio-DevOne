@@ -1,11 +1,12 @@
 "use client";
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
 import ProjectConstellation from './ProjectConstellation';
 import SpatialInstructions from './SpatialInstructions';
 import AmbientGeometry from './AmbientGeometry';
+import OrbitalSectionStation from './OrbitalSectionStation';
 
 interface Project {
   id: number;
@@ -39,7 +40,20 @@ interface CameraWaypoint {
   floatIntensity: number;
 }
 
-// Define camera choreography for each section
+// Orbital camera configuration - smooth 360° journey
+export const ORBITAL_CONFIG = {
+  cameraRadius: 12,        // Camera distance from centerpiece
+  sectionRadius: 10,       // Section orbital station distance
+  height: 2,               // Camera height variation
+  sections: {
+    hero: { angle: 0, height: 1 },           // Front (0°)
+    projects: { angle: Math.PI / 2, height: 0.5 },     // Right (90°)
+    skills: { angle: Math.PI, height: 1.5 },           // Back (180°)
+    contact: { angle: (Math.PI * 3) / 2, height: 0 },  // Left (270°)
+  }
+};
+
+// Define camera choreography for each section as orbital waypoints
 const CAMERA_CHOREOGRAPHY: Record<string, {
   entry: CameraWaypoint;
   exit: CameraWaypoint;
@@ -47,16 +61,16 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
 }> = {
   hero: {
     entry: {
-      position: [0, 0, 5],
+      position: [0, 1, 12],  // Front view
       lookAt: [0, 0, 0],
       rotationSpeed: 1.0,
       floatIntensity: 0.5,
     },
     exit: {
-      position: [2, 0.5, 3.5],  // Move to center-right, closer
-      lookAt: [0.5, 0.2, 0],
-      rotationSpeed: 1.5,
-      floatIntensity: 0.25,
+      position: [6, 0.75, 10.4],  // Transitioning to right
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.2,
+      floatIntensity: 0.4,
     },
     easing: (t) => {
       // Smooth ease-in-out
@@ -65,16 +79,16 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   projects: {
     entry: {
-      position: [2, 0.5, 3.5],  // Start from hero exit
-      lookAt: [0.5, 0.2, 0],
-      rotationSpeed: 1.5,
-      floatIntensity: 0.25,
+      position: [6, 0.75, 10.4],  // Arriving from front
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.2,
+      floatIntensity: 0.4,
     },
     exit: {
-      position: [-2.5, 1, 4],  // Swing to left, slightly higher
-      lookAt: [-0.8, 0.3, 0],
-      rotationSpeed: 1.8,
-      floatIntensity: 0.15,
+      position: [10.4, 1.125, -6],  // Transitioning to back
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.4,
+      floatIntensity: 0.3,
     },
     easing: (t) => {
       // Cubic ease-out for smooth deceleration
@@ -83,16 +97,16 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   skills: {
     entry: {
-      position: [-2.5, 1, 4],  // Start from projects exit
-      lookAt: [-0.8, 0.3, 0],
-      rotationSpeed: 1.8,
-      floatIntensity: 0.15,
+      position: [10.4, 1.125, -6],  // Arriving from right
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.4,
+      floatIntensity: 0.3,
     },
     exit: {
-      position: [0, 3, 5],  // Move to top, centered perspective
-      lookAt: [0, -0.5, 0],
-      rotationSpeed: 2.0,
-      floatIntensity: 0.1,
+      position: [-6, 0.375, -10.4],  // Transitioning to left
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.6,
+      floatIntensity: 0.25,
     },
     easing: (t) => {
       // Quartic ease-in-out for dramatic orbit
@@ -103,25 +117,20 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   contact: {
     entry: {
-      position: [0, 3, 5],  // Start from skills exit
-      lookAt: [0, -0.5, 0],
-      rotationSpeed: 2.0,
-      floatIntensity: 0.1,
+      position: [-6, 0.375, -10.4],  // Arriving from back
+      lookAt: [0, 0, 0],
+      rotationSpeed: 1.6,
+      floatIntensity: 0.25,
     },
     exit: {
-      position: [0, 0, 4],  // Return to front-facing, slightly closer
+      position: [-10.4, 0.625, 6],  // Completing orbit back to front
       lookAt: [0, 0, 0],
-      rotationSpeed: 1.2,
-      floatIntensity: 0.3,
+      rotationSpeed: 1.3,
+      floatIntensity: 0.4,
     },
     easing: (t) => {
-      // Bounce ease-out for playful ending
-      const c4 = (2 * Math.PI) / 3;
-      return t === 0
-        ? 0
-        : t === 1
-        ? 1
-        : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
+      // Smooth ease for completion
+      return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
     },
   },
 };
@@ -253,8 +262,35 @@ export default function ChoreographedGeometry({
     }
   });
 
+  // Navigate to section by scrolling
+  const navigateToSection = (sectionName: string) => {
+    const vh = window.innerHeight;
+    const sectionMap: Record<string, number> = {
+      hero: 0,
+      projects: vh,
+      skills: vh * 2,
+      contact: vh * 3,
+    };
+    
+    window.scrollTo({
+      top: sectionMap[sectionName] || 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <>
+      {/* Orbital Section Stations - Cardinal positioned markers */}
+      {Object.entries(ORBITAL_CONFIG.sections).map(([name, config]) => (
+        <OrbitalSectionStation
+          key={name}
+          section={{ name, ...config }}
+          radius={ORBITAL_CONFIG.sectionRadius}
+          activeSection={activeSection}
+          onNavigate={() => navigateToSection(name)}
+        />
+      ))}
+
       {/* Spatial Instructions - Exist in 3D Space */}
       <SpatialInstructions 
         activeSection={activeSection}
@@ -267,14 +303,12 @@ export default function ChoreographedGeometry({
         sectionProgress={sectionProgress}
       />
 
-      {/* Project Constellation - Elegant Geometric System */}
+      {/* Project Constellation - Stable Orbital System */}
       {projects.length > 0 && (
         <ProjectConstellation
           projects={projects}
           activeSection={activeSection}
-          sectionProgress={sectionProgress}
           onProjectClick={onProjectClick}
-          focusedProjectId={focusedProject?.project.id || null}
           onProjectFocus={onProjectFocus}
           resetTrigger={resetTrigger}
         />
