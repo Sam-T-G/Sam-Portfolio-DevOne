@@ -42,7 +42,7 @@ export default function CinematicProject({
   const glowRef = useRef<THREE.Mesh>(null!);
   const particlesRef = useRef<THREE.Points>(null!);
 
-  // Responsive positioning for panel
+  // Viewport-aware responsive positioning
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -227,16 +227,17 @@ export default function CinematicProject({
       {isActive && (
         <Html
           key={`panel-${isMobile ? 'mobile' : 'desktop'}`}
-          position={[0, -1.2, 0]}
-          center={!isMobile}
-          distanceFactor={isMobile ? 8 : 6}
+          position={[0, isMobile ? -0.5 : -0.6, 0]}
+          center
+          transform
+          distanceFactor={isMobile ? 5 : 4.5}
           zIndexRange={[100, 0]}
           style={{
             transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: 1,
-            transform: isMobile ? 'translateX(-50%)' : 'scale(1)',
             pointerEvents: 'auto',
-            left: isMobile ? '50%' : 'auto',
+            width: 'fit-content',
+            maxWidth: isMobile ? '85vw' : '70vw',
           }}
         >
           <div
@@ -247,17 +248,18 @@ export default function CinematicProject({
               backdropFilter: 'blur(24px)',
               border: `4px solid ${project.color}`,
               borderRadius: '10px',
-              padding: isMobile ? '20px 16px' : '32px 40px',
-              minWidth: isMobile ? 'auto' : '520px',
-              maxWidth: isMobile ? '92vw' : '780px',
-              width: isMobile ? '92vw' : '600px',
+              padding: isMobile ? '18px 14px' : '28px 36px',
+              minWidth: isMobile ? 'auto' : '480px',
+              maxWidth: isMobile ? '85vw' : '65vw',
+              width: isMobile ? '85vw' : 'clamp(480px, 55vw, 680px)',
               boxShadow: `0 0 80px ${project.color}90, inset 0 0 40px ${project.color}25, 0 8px 30px #00000090`,
               fontFamily: '"Courier New", monospace',
               animation: 'borderPulse 2s ease-in-out infinite, slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
               cursor: project.link ? 'pointer' : 'default',
               transition: 'all 0.3s ease',
               boxSizing: 'border-box',
-              margin: isMobile ? '0 auto 8vh auto' : '0',
+              margin: '0 auto',
+              overflow: 'hidden',
             }}
             onMouseEnter={(e) => {
               if (project.link) {
@@ -296,39 +298,45 @@ export default function CinematicProject({
               @media (max-width: 768px) {
                 div[style*="minWidth"] {
                   min-width: auto !important;
-                  max-width: 92vw !important;
-                  width: 92vw !important;
-                  padding: 20px 16px !important;
-                  margin-left: auto !important;
-                  margin-right: auto !important;
-                  margin-bottom: 8vh !important;
+                  max-width: 85vw !important;
+                  width: 85vw !important;
+                  padding: 18px 14px !important;
+                  margin: 0 auto !important;
                 }
                 
                 /* Responsive typography for mobile */
                 h2 {
-                  font-size: 24px !important;
-                  letter-spacing: 2px !important;
-                  margin: 8px 0 10px 0 !important;
+                  font-size: 22px !important;
+                  letter-spacing: 1.5px !important;
+                  margin: 6px 0 8px 0 !important;
                 }
                 
                 p {
-                  font-size: 13px !important;
-                  letter-spacing: 1.2px !important;
-                  margin-bottom: 14px !important;
+                  font-size: 12px !important;
+                  letter-spacing: 1px !important;
+                  margin-bottom: 12px !important;
+                  line-height: 1.4 !important;
                 }
                 
                 /* Smaller project badge */
                 div[style*="PROJECT"] {
-                  font-size: 10px !important;
-                  padding: 5px 12px !important;
-                  letter-spacing: 2px !important;
+                  font-size: 9px !important;
+                  padding: 4px 10px !important;
+                  letter-spacing: 1.5px !important;
                 }
                 
                 /* Smaller tech tags */
                 div[style*="inline-block"] {
-                  font-size: 10px !important;
-                  padding: 6px 12px !important;
-                  margin: 4px 4px 4px 0 !important;
+                  font-size: 9px !important;
+                  padding: 5px 10px !important;
+                  margin: 3px 3px 3px 0 !important;
+                }
+              }
+              
+              @media (min-width: 769px) {
+                /* Desktop viewport containment */
+                div[style*="minWidth"] {
+                  max-width: 65vw !important;
                 }
               }
               
