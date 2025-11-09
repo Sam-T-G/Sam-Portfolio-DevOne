@@ -32,7 +32,7 @@ export default function ThemeToggle() {
     return (
       <button
         onClick={toggleTheme}
-        className="relative h-8 w-8 rounded-full border border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900"
+        className="relative h-7 w-7 rounded border border-[#0891B2]/40 bg-[#0891B2]/10"
         aria-label="Toggle theme"
       />
     );
@@ -41,27 +41,33 @@ export default function ThemeToggle() {
   return (
     <motion.button
       onClick={toggleTheme}
+      whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
-      className="relative h-8 w-8 rounded-full border border-zinc-300 bg-zinc-100 dark:border-zinc-700 dark:bg-zinc-900"
+      className="relative h-7 w-7 rounded border border-[#0891B2]/40 bg-[#0891B2]/10 transition-all hover:border-[#0891B2]/60 hover:bg-[#0891B2]/20 hover:shadow-[0_0_10px_rgba(8,145,178,0.3)]"
       aria-label="Toggle theme"
+      style={{
+        boxShadow: '0 0 8px rgba(8, 145, 178, 0.2)',
+      }}
     >
+      {/* Sun icon - shown in light mode, needs to be visible on dark HUD */}
       <motion.div
         initial={false}
         animate={{
           scale: theme === "light" ? 1 : 0,
           opacity: theme === "light" ? 1 : 0,
+          rotate: theme === "light" ? 0 : 180,
         }}
-        transition={{ duration: 0.2 }}
-        className="absolute inset-0 flex items-center justify-center text-zinc-800"
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="absolute inset-0 flex items-center justify-center text-[#0891B2]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
+          width="14"
+          height="14"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
@@ -76,23 +82,25 @@ export default function ThemeToggle() {
           <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
         </svg>
       </motion.div>
+      {/* Moon icon - shown in dark mode */}
       <motion.div
         initial={false}
         animate={{
           scale: theme === "dark" ? 1 : 0,
           opacity: theme === "dark" ? 1 : 0,
+          rotate: theme === "dark" ? 0 : -180,
         }}
-        transition={{ duration: 0.2 }}
-        className="absolute inset-0 flex items-center justify-center text-zinc-200"
+        transition={{ duration: 0.3, ease: "easeInOut" }}
+        className="absolute inset-0 flex items-center justify-center text-[#0891B2]"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
+          width="14"
+          height="14"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
-          strokeWidth="2"
+          strokeWidth="2.5"
           strokeLinecap="round"
           strokeLinejoin="round"
         >
