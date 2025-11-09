@@ -55,11 +55,6 @@ export default function CinematicProject({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Dynamic X position: centered on mobile, offset left on desktop for better composition
-  // Mobile: 0 = perfectly centered with 3D object
-  // Desktop: -0.3 = offset left to create visual interest and avoid overlap
-  const panelXPosition = isMobile ? 0 : -0.3;
-
   // Select geometry based on project ID for consistency
   const geometry = useMemo(() => {
     return SIGNATURE_GEOMETRIES[(project.id - 1) % SIGNATURE_GEOMETRIES.length];
@@ -232,15 +227,16 @@ export default function CinematicProject({
       {isActive && (
         <Html
           key={`panel-${isMobile ? 'mobile' : 'desktop'}`}
-          position={[panelXPosition, -1.2, 0]}
-          center
-          distanceFactor={6}
+          position={[0, -1.2, 0]}
+          center={!isMobile}
+          distanceFactor={isMobile ? 8 : 6}
           zIndexRange={[100, 0]}
           style={{
             transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: 1,
-            transform: 'scale(1)',
+            transform: isMobile ? 'translateX(-50%)' : 'scale(1)',
             pointerEvents: 'auto',
+            left: isMobile ? '50%' : 'auto',
           }}
         >
           <div
@@ -251,16 +247,17 @@ export default function CinematicProject({
               backdropFilter: 'blur(24px)',
               border: `4px solid ${project.color}`,
               borderRadius: '10px',
-              padding: '32px 40px',
-              minWidth: '480px',
-              maxWidth: '780px',
-              width: '90vw',
+              padding: isMobile ? '24px 20px' : '32px 40px',
+              minWidth: isMobile ? 'auto' : '480px',
+              maxWidth: isMobile ? '90vw' : '780px',
+              width: isMobile ? '90vw' : 'auto',
               boxShadow: `0 0 80px ${project.color}90, inset 0 0 40px ${project.color}25, 0 8px 30px #00000090`,
               fontFamily: '"Courier New", monospace',
               animation: 'borderPulse 2s ease-in-out infinite, slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
               cursor: project.link ? 'pointer' : 'default',
               transition: 'all 0.3s ease',
               boxSizing: 'border-box',
+              margin: isMobile ? '0 auto' : '0',
             }}
             onMouseEnter={(e) => {
               if (project.link) {
@@ -297,11 +294,13 @@ export default function CinematicProject({
               }
               
               @media (max-width: 768px) {
-                div[style*="minWidth: '480px'"] {
-                  min-width: 100% !important;
-                  max-width: 92vw !important;
-                  width: 92vw !important;
-                  padding: 28px 24px !important;
+                div[style*="minWidth"] {
+                  min-width: auto !important;
+                  max-width: 90vw !important;
+                  width: 90vw !important;
+                  padding: 24px 20px !important;
+                  margin-left: auto !important;
+                  margin-right: auto !important;
                 }
               }
               
