@@ -11,6 +11,7 @@ interface Project {
   color: string;
   link?: string;
   description?: string;
+  mobileDescription?: string;
   tags?: string[];
   hackathon?: string;
 }

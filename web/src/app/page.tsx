@@ -19,7 +19,8 @@ const projects = [
     color: "#0891B2", 
     link: "https://github.com/sam-t-g/SosheIQ",
     description: "Advanced AI-powered platform leveraging Google Gemini and Imagen to create realistic conversation scenarios with visual feedback. Features scientifically-anchored personality traits, cinematic animations, and comprehensive progress tracking to help users master social interactions.",
-    tags: ["Next.js 14", "TypeScript", "Google AI", "Framer Motion", "Tailwind CSS"],
+    mobileDescription: "AI platform using Google Gemini and Imagen for realistic conversation training with visual feedback and progress tracking.",
+    tags: ["Google Gemini", "Next.js 14", "TypeScript", "Framer Motion"],
     hackathon: "UC Berkeley AI Hackathon 2025"
   },
   { 
@@ -29,7 +30,8 @@ const projects = [
     color: "#10B981", 
     link: "https://github.com/sam-t-g/vitalis",
     description: "AI-powered emergency management system using fine-tuned GPT-OSS 20B for disaster response coordination. Aligned with FEMA, WHO, and Red Cross protocols, providing expert guidance for resource coordination and emergency operations with Apple Silicon optimization.",
-    tags: ["PyTorch", "GPT-OSS 20B", "Python", "Emergency Management", "AI Training"],
+    mobileDescription: "Fine-tuned GPT-OSS 20B model for disaster response coordination aligned with FEMA, WHO, and Red Cross protocols.",
+    tags: ["AI/ML", "PyTorch", "GPT-OSS 20B", "Python"],
     hackathon: "OpenAI Open Model Hackathon"
   },
   { 
@@ -39,7 +41,8 @@ const projects = [
     color: "#F59E0B", 
     link: "https://github.com/sam-t-g/fullchat",
     description: "Real-time communication platform built for developers, featuring Socket.io-powered messaging, MySQL database architecture, and dynamic routing. Designed as a dedicated space for the developer community to collaborate and connect in real-time.",
-    tags: ["Socket.io", "Express", "MySQL", "Node.js", "Handlebars"]
+    mobileDescription: "Real-time messaging platform with Socket.io-powered communication and MySQL database architecture for developers.",
+    tags: ["Socket.io", "Express", "MySQL", "Node.js"]
   },
   { 
     id: 4, 
@@ -48,7 +51,8 @@ const projects = [
     color: "#8B5CF6",
     link: "https://github.com/sam-t-g/calhacks25",
     description: "Cal Hacks 25 project combining AI-driven activity generation with gamification mechanics. Features Claude-powered personalized tasks, photo verification system, and an interactive voice assistant companion. Earn XP by completing real-world social good activities.",
-    tags: ["Next.js", "Claude AI", "LiveKit", "Voice AI", "Gamification"],
+    mobileDescription: "Claude AI-powered app generating personalized social impact tasks with voice assistant and gamification mechanics.",
+    tags: ["Claude AI", "Next.js", "LiveKit", "Voice AI"],
     hackathon: "UC Berkeley Cal Hacks 2025"
   },
 ];

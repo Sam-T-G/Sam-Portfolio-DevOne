@@ -11,6 +11,7 @@ interface Project {
   color: string;
   link?: string;
   description?: string;
+  mobileDescription?: string;
   tags?: string[];
   hackathon?: string;
 }
@@ -433,8 +434,8 @@ export default function CinematicProject({
               }}
             />
 
-            {/* Description if available */}
-            {project.description && (
+            {/* Description if available - use mobile version on mobile */}
+            {(project.description || project.mobileDescription) && (
               <p
                 style={{
                   color: '#ffffff',
@@ -446,7 +447,7 @@ export default function CinematicProject({
                   textShadow: '0 1px 3px #000000',
                 }}
               >
-                {project.description}
+                {isMobile && project.mobileDescription ? project.mobileDescription : project.description}
               </p>
             )}
 
