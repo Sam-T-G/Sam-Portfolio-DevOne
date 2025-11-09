@@ -17,7 +17,7 @@ export default function AmbientGeometry({ activeSection, sectionProgress }: Ambi
   useFrame((state) => {
     // Smooth opacity transitions for each section's elements
     if (homeElementsRef.current) {
-      const targetOpacity = activeSection === 'home' ? 1 : 0;
+      const targetOpacity = activeSection === 'home' ? 0.8 : 0;
       homeElementsRef.current.children.forEach((child) => {
         if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
           child.material.opacity = THREE.MathUtils.lerp(
@@ -73,6 +73,8 @@ export default function AmbientGeometry({ activeSection, sectionProgress }: Ambi
               opacity={0}
               metalness={0.3}
               roughness={0.4}
+              emissive="#0891B2"
+              emissiveIntensity={0.4}
             />
           </mesh>
         </Float>
@@ -90,6 +92,8 @@ export default function AmbientGeometry({ activeSection, sectionProgress }: Ambi
               opacity={0}
               metalness={0.2}
               roughness={0.5}
+              emissive="#10B981"
+              emissiveIntensity={0.3}
             />
           </mesh>
         </Float>
@@ -107,6 +111,8 @@ export default function AmbientGeometry({ activeSection, sectionProgress }: Ambi
               opacity={0}
               metalness={0.4}
               roughness={0.3}
+              emissive="#F59E0B"
+              emissiveIntensity={0.5}
             />
           </mesh>
         </Float>
