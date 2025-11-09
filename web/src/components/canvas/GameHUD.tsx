@@ -1,5 +1,4 @@
 "use client";
-import { useEffect, useState } from 'react';
 
 interface GameHUDProps {
   targetName: string;
@@ -34,52 +33,9 @@ export default function GameHUD({
   expanded = false,
   onExpand,
 }: GameHUDProps) {
-  const [scanProgress, setScanProgress] = useState(0);
-  const [glitchText, setGlitchText] = useState(targetName);
-
-  // Scanning animation
-  useEffect(() => {
-    if (!visible) return;
-    
-    const interval = setInterval(() => {
-      setScanProgress((prev) => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 5;
-      });
-    }, 30);
-    return () => clearInterval(interval);
-  }, [visible]);
-
-  // Glitch effect on name
-  useEffect(() => {
-    if (!visible) return;
-    
-    const glitchChars = '!@#$%^&*()_+{}[]|;:<>?/~`';
-    const originalName = targetName;
-    
-    const glitch = () => {
-      const shouldGlitch = Math.random() > 0.95;
-      if (shouldGlitch) {
-        const glitched = originalName
-          .split('')
-          .map(char => Math.random() > 0.7 ? glitchChars[Math.floor(Math.random() * glitchChars.length)] : char)
-          .join('');
-        setGlitchText(glitched);
-        setTimeout(() => setGlitchText(originalName), 50);
-      }
-    };
-
-    const interval = setInterval(glitch, 2000);
-    return () => clearInterval(interval);
-  }, [visible, targetName]);
-
   if (!visible) return null;
 
   const typeLabel = targetType.toUpperCase();
-  const scanComplete = scanProgress === 100;
 
   return (
     <div
@@ -148,20 +104,7 @@ export default function GameHUD({
         <div style={{ position: 'absolute', bottom: '-2px', left: '-2px', width: '20px', height: '20px', borderBottom: `4px solid ${color}`, borderLeft: `4px solid ${color}` }} />
         <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', width: '20px', height: '20px', borderBottom: `4px solid ${color}`, borderRight: `4px solid ${color}` }} />
 
-        {/* Scan Line Effect */}
-        {!scanComplete && (
-          <div
-            style={{
-              position: 'absolute',
-              left: 0,
-              right: 0,
-              height: '2px',
-              background: `linear-gradient(90deg, transparent, ${color}, transparent)`,
-              animation: 'scanLine 0.6s linear infinite',
-              opacity: 0.6,
-            }}
-          />
-        )}
+        {/* Removed scan line effect */}
 
         {/* Header - Type & Status */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
@@ -197,7 +140,7 @@ export default function GameHUD({
             textShadow: `0 0 10px ${color}60`,
           }}
         >
-          {glitchText}
+          {targetName}
         </h2>
 
         {/* Subtitle - Always shown */}
@@ -208,7 +151,7 @@ export default function GameHUD({
         )}
 
         {/* Collapsed state - minimal info */}
-        {!expanded && scanComplete && (
+        {!expanded && (
           <div
             style={{
               display: 'flex',
@@ -230,28 +173,6 @@ export default function GameHUD({
         {/* Expanded state - full information */}
         {expanded && (
           <>
-            {/* Scan Progress Bar */}
-            <div
-              style={{
-                height: '4px',
-                background: '#1a1a1a',
-                border: `1px solid ${color}40`,
-                borderRadius: '2px',
-                overflow: 'hidden',
-                marginBottom: '12px',
-              }}
-            >
-              <div
-                style={{
-                  height: '100%',
-                  width: `${scanProgress}%`,
-                  background: `linear-gradient(90deg, ${color}60, ${color})`,
-                  boxShadow: `0 0 10px ${color}`,
-                  transition: 'width 0.1s linear',
-                }}
-              />
-            </div>
-
             {/* Description */}
             {description && (
               <p

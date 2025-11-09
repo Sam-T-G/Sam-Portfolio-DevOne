@@ -10,15 +10,15 @@ interface AmbientGeometryProps {
 }
 
 export default function AmbientGeometry({ activeSection, sectionProgress }: AmbientGeometryProps) {
-  const heroElementsRef = useRef<THREE.Group>(null!);
+  const homeElementsRef = useRef<THREE.Group>(null!);
   const skillsElementsRef = useRef<THREE.Group>(null!);
   const contactElementsRef = useRef<THREE.Group>(null!);
 
   useFrame((state) => {
     // Smooth opacity transitions for each section's elements
-    if (heroElementsRef.current) {
-      const targetOpacity = activeSection === 'hero' ? 1 : 0;
-      heroElementsRef.current.children.forEach((child) => {
+    if (homeElementsRef.current) {
+      const targetOpacity = activeSection === 'home' ? 1 : 0;
+      homeElementsRef.current.children.forEach((child) => {
         if (child instanceof THREE.Mesh && child.material instanceof THREE.MeshStandardMaterial) {
           child.material.opacity = THREE.MathUtils.lerp(
             child.material.opacity,
@@ -58,8 +58,8 @@ export default function AmbientGeometry({ activeSection, sectionProgress }: Ambi
 
   return (
     <>
-      {/* Hero Section - Floating Geometric Shapes */}
-      <group ref={heroElementsRef}>
+      {/* Home Section - Floating Geometric Shapes */}
+      <group ref={homeElementsRef}>
         <Float
           speed={1.2}
           rotationIntensity={0.3}

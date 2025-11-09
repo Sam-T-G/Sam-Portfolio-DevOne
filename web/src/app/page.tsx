@@ -4,26 +4,83 @@ import { useScroll, motion } from "framer-motion";
 import PermanentSceneBackground from "@/components/canvas/PermanentSceneBackground";
 import EscapeButton from "@/components/ui/EscapeButton";
 import HUDManager from "@/components/canvas/HUDManager";
+import SectionIndicator from "@/components/canvas/SectionIndicator";
+import TimelineNavigation from "@/components/canvas/TimelineNavigation";
+import SwipeIndicator from "@/components/ui/SwipeIndicator";
+import { useMobileTouch } from "@/hooks/useMobileTouch";
+import { navigateToNextSection, navigateToPreviousSection } from "@/utils/sectionNavigation";
 
 // Project data for unified 3D space
 const projects = [
-  { id: 1, title: "SosheIQ", subtitle: "AI Social Coach", color: "#0891B2", link: "https://github.com/sam-t-g/SosheIQ" },
-  { id: 2, title: "Vitalis", subtitle: "Emergency AI", color: "#10B981", link: "https://github.com/sam-t-g/vitalis" },
-  { id: 3, title: "FullChat", subtitle: "Messaging Platform", color: "#F59E0B", link: "https://github.com/sam-t-g/fullchat" },
-  { id: 4, title: "DoGood", subtitle: "Social Simulation", color: "#8B5CF6" },
+  { 
+    id: 1, 
+    title: "SosheIQ", 
+    subtitle: "AI Social Interaction Trainer", 
+    color: "#0891B2", 
+    link: "https://github.com/sam-t-g/SosheIQ",
+    description: "Advanced AI-powered platform leveraging Google Gemini and Imagen to create realistic conversation scenarios with visual feedback. Features scientifically-anchored personality traits, cinematic animations, and comprehensive progress tracking to help users master social interactions.",
+    tags: ["Next.js 14", "TypeScript", "Google AI", "Framer Motion", "Tailwind CSS"],
+    hackathon: "UC Berkeley AI Hackathon 2025"
+  },
+  { 
+    id: 2, 
+    title: "Vitalis", 
+    subtitle: "Emergency Relief AI System", 
+    color: "#10B981", 
+    link: "https://github.com/sam-t-g/vitalis",
+    description: "AI-powered emergency management system using fine-tuned GPT-OSS 20B for disaster response coordination. Aligned with FEMA, WHO, and Red Cross protocols, providing expert guidance for resource coordination and emergency operations with Apple Silicon optimization.",
+    tags: ["PyTorch", "GPT-OSS 20B", "Python", "Emergency Management", "AI Training"],
+    hackathon: "OpenAI Open Model Hackathon"
+  },
+  { 
+    id: 3, 
+    title: "FullChat", 
+    subtitle: "Developer Messaging Platform", 
+    color: "#F59E0B", 
+    link: "https://github.com/sam-t-g/fullchat",
+    description: "Real-time communication platform built for developers, featuring Socket.io-powered messaging, MySQL database architecture, and dynamic routing. Designed as a dedicated space for the developer community to collaborate and connect in real-time.",
+    tags: ["Socket.io", "Express", "MySQL", "Node.js", "Handlebars"]
+  },
+  { 
+    id: 4, 
+    title: "DoGood", 
+    subtitle: "Gamified Social Impact App", 
+    color: "#8B5CF6",
+    link: "https://github.com/sam-t-g/calhacks25",
+    description: "Cal Hacks 25 project combining AI-driven activity generation with gamification mechanics. Features Claude-powered personalized tasks, photo verification system, and an interactive voice assistant companion. Earn XP by completing real-world social good activities.",
+    tags: ["Next.js", "Claude AI", "LiveKit", "Voice AI", "Gamification"],
+    hackathon: "UC Berkeley Cal Hacks 2025"
+  },
 ];
 
 export default function Home() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [isFocused, setIsFocused] = useState(false);
+  const [activeSection, setActiveSection] = useState('home');
   
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end end"],
   });
 
+  // Mobile touch navigation - swipe up/down to navigate between sections
+  useMobileTouch({
+    minSwipeDistance: 60,
+    maxSwipeTime: 400,
+    velocityThreshold: 0.3,
+    enableHaptics: true,
+    onSwipeUp: () => {
+      // Swipe up = scroll down = next section
+      navigateToNextSection();
+    },
+    onSwipeDown: () => {
+      // Swipe down = scroll up = previous section
+      navigateToPreviousSection();
+    },
+  });
+
   return (
-    <div ref={containerRef} className="relative bg-gradient-to-b from-[#f5f5f5] via-[#fafafa] to-[#f0f0f0]">
+    <div ref={containerRef} className="relative bg-gradient-to-b from-[#f5f5f5] via-[#fafafa] to-[#f0f0f0]" style={{ scrollSnapType: 'y proximity' }}>
       {/* Permanent 3D Background - Unified Spatial Experience */}
       <PermanentSceneBackground 
         projects={projects}
@@ -33,6 +90,7 @@ export default function Home() {
           }
         }}
         onFocusChange={(focused) => setIsFocused(focused)}
+        onSectionChange={(section) => setActiveSection(section)}
       />
       
       {/* ESC Button - Only in project highlight mode */}
@@ -40,6 +98,15 @@ export default function Home() {
 
       {/* Game-style HUD System */}
       <HUDManager />
+
+      {/* Persistent Section Indicator - Top Right */}
+      <SectionIndicator activeSection={activeSection} projects={projects} />
+
+      {/* Timeline Navigation - Right Side */}
+      <TimelineNavigation activeSection={activeSection} projects={projects} />
+
+      {/* Mobile Swipe Indicator - Shows on first mobile visit */}
+      <SwipeIndicator />
 
       {/* Scroll Progress Indicator */}
       <motion.div
@@ -97,92 +164,75 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Projects - Pure 3D Space (Instructions exist IN the 3D scene) */}
-      <section id="projects" className="pointer-events-none relative" style={{ minHeight: '150vh' }}>
-        {/* Empty space - 3D content shows through, all interactions with 3D */}
-      </section>
+      {/* Projects - Each gets dedicated viewport for cinematic presentation */}
+      {projects.map((project, index) => (
+        <section
+          key={project.id}
+          id={`project-${index}`}
+          className="pointer-events-none relative flex min-h-screen items-center justify-center"
+          style={{ scrollSnapAlign: 'center', scrollSnapStop: 'always', paddingBottom: index === projects.length - 1 ? '25vh' : '0' }}
+        >
+          {/* 3D project presentation renders here - handled by CinematicShowcase */}
+          {/* Optional: Add subtle gradient overlay or other 2D embellishments */}
+        </section>
+      ))}
+
+      {/* Spacer between projects and skills - Critical breathing room */}
+      <div className="h-screen" aria-hidden="true" />
 
       {/* Skills - Floating in Space */}
-      <section id="skills" className="pointer-events-none relative z-10 min-h-screen py-32">
-        <div className="pointer-events-auto mx-auto max-w-6xl px-6">
-          <motion.h2
-            initial={{ opacity: 0, x: -40 }}
-            whileInView={{ opacity: 1, x: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="mb-12 text-3xl font-semibold text-brand-teal"
-          >
+      <section id="skills" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-24 pb-40">
+        <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
+          <h2 className="mb-12 text-3xl font-semibold text-brand-teal">
             Skills / Tech Stack
-          </motion.h2>
+          </h2>
           
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { category: "Languages", skills: ["C++", "TypeScript", "Python", "JavaScript", "HTML", "CSS"] },
               { category: "Frameworks & Tools", skills: ["React", "Next.js", "Node.js", "Docker", "Git", "Google Cloud Suite", "AWS"] },
               { category: "Specializations", skills: ["AI Integration", "Full-Stack Development", "Data Structures", "Algorithms", "RESTful APIs"] },
-            ].map((group, groupIndex) => (
-              <motion.div
+            ].map((group) => (
+              <div
                 key={group.category}
-                initial={{ opacity: 0, x: -60 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ 
-                  duration: 0.7, 
-                  delay: groupIndex * 0.2,
-                  ease: [0.22, 1, 0.36, 1]
-                }}
                 className="group rounded-2xl border border-brand-teal/20 bg-white/80 p-6 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:border-brand-teal/40 hover:shadow-xl hover:shadow-brand-teal/10"
               >
                 <h3 className="mb-4 text-lg font-semibold text-brand-orange">
                   {group.category}
                 </h3>
                 <div className="flex flex-wrap gap-2">
-                  {group.skills.map((skill, skillIndex) => (
-                    <motion.span
+                  {group.skills.map((skill) => (
+                    <span
                       key={skill}
-                      initial={{ opacity: 0, scale: 0.8 }}
-                      whileInView={{ opacity: 1, scale: 1 }}
-                      viewport={{ once: true }}
-                      transition={{ 
-                        duration: 0.3, 
-                        delay: groupIndex * 0.2 + skillIndex * 0.05 
-                      }}
                       className="rounded-full border border-brand-teal/30 bg-brand-mint/10 px-3 py-1.5 text-sm text-brand-teal transition-colors hover:bg-brand-teal/20"
                     >
                       {skill}
-                    </motion.span>
+                    </span>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
       </section>
 
+      {/* Spacer between skills and contact - Breathing room */}
+      <div className="h-96" aria-hidden="true" />
+
       {/* Contact - Floating in Space */}
-      <section id="contact" className="pointer-events-none relative z-10 min-h-screen py-32">
-        <div className="pointer-events-auto mx-auto max-w-6xl px-6">
-          <motion.div
-            initial={{ opacity: 0, y: 40 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-            className="max-w-2xl"
-          >
+      <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-16 pb-32">
+        <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
+          <div className="max-w-2xl">
             <h2 className="mb-4 text-3xl font-semibold text-brand-orange">Contact</h2>
             <p className="mb-8 text-zinc-700">
               Reach me directly via any of the links below.
             </p>
-          </motion.div>
+          </div>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Email */}
-            <motion.a
+            <a
               href="mailto:samuelgerungan@gmail.com"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4 }}
               className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
@@ -192,17 +242,13 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">Email</p>
                 <p className="font-medium text-zinc-800">samuelgerungan@gmail.com</p>
               </div>
-            </motion.a>
+            </a>
 
             {/* GitHub */}
-            <motion.a
+            <a
               href="https://github.com/sam-t-g"
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.05 }}
               className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
@@ -212,17 +258,13 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">GitHub</p>
                 <p className="font-medium text-zinc-800">github.com/sam-t-g</p>
               </div>
-            </motion.a>
+            </a>
 
             {/* LinkedIn */}
-            <motion.a
+            <a
               href="https://linkedin.com/in/samuelgerungan"
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.1 }}
               className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
@@ -232,15 +274,11 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">LinkedIn</p>
                 <p className="font-medium text-zinc-800">linkedin.com/in/samuelgerungan</p>
               </div>
-            </motion.a>
+            </a>
 
             {/* Phone */}
-            <motion.a
+            <a
               href="tel:+19098106275"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.15 }}
               className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
@@ -250,16 +288,10 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">Phone</p>
                 <p className="font-medium text-zinc-800">(909) 810-6275</p>
               </div>
-            </motion.a>
+            </a>
 
             {/* Location */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.2 }}
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm"
-            >
+            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               </span>
@@ -267,16 +299,10 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">Location</p>
                 <p className="font-medium text-zinc-800">San Bernardino, CA</p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Education */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.25 }}
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm"
-            >
+            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
               </span>
@@ -284,17 +310,13 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">Education</p>
                 <p className="font-medium text-zinc-800">Riverside City College</p>
               </div>
-            </motion.div>
+            </div>
 
             {/* Resume */}
-            <motion.a
+            <a
               href="/Samuel_Gerungan_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.4, delay: 0.3 }}
               className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
@@ -304,7 +326,7 @@ export default function Home() {
                 <p className="text-sm text-brand-orange">Resume</p>
                 <p className="font-medium text-zinc-800">View Resume</p>
               </div>
-            </motion.a>
+            </a>
           </div>
         </div>
       </section>

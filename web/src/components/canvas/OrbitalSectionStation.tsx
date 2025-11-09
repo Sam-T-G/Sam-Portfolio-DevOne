@@ -1,7 +1,7 @@
 "use client";
 import { useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
-import { Html } from '@react-three/drei';
+import { Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 // Utility to project 3D position to 2D screen coordinates
@@ -101,107 +101,170 @@ export default function OrbitalSectionStation({
       onPointerOver={handlePointerOver}
       onPointerOut={handlePointerOut}
     >
-      {/* Outer ring indicator */}
+      {/* Complex HUD Frame Structure */}
+      {/* Main Octahedron Core */}
+      <mesh>
+        <octahedronGeometry args={[0.8, 0]} />
+        <meshStandardMaterial
+          color={isActive ? "#0891B2" : "#666666"}
+          emissive={isActive ? "#0891B2" : "#333333"}
+          emissiveIntensity={isActive ? 1.2 : 0.4}
+          wireframe
+          transparent
+          opacity={isActive ? 0.8 : 0.5}
+        />
+      </mesh>
+
+      {/* Inner Icosahedron */}
+      <mesh scale={0.6}>
+        <icosahedronGeometry args={[1, 0]} />
+        <meshStandardMaterial
+          color={isActive ? "#0891B2" : "#666666"}
+          emissive={isActive ? "#0891B2" : "#444444"}
+          emissiveIntensity={isActive ? 0.8 : 0.3}
+          wireframe
+          transparent
+          opacity={isActive ? 0.6 : 0.4}
+        />
+      </mesh>
+
+      {/* Rotating outer ring frames */}
       <mesh ref={ringRef}>
-        <torusGeometry args={[1.5, 0.1, 8, 32]} />
+        <torusGeometry args={[1.5, 0.08, 6, 24]} />
+        <meshStandardMaterial
+          color={isActive ? "#0891B2" : "#666666"}
+          emissive={isActive ? "#0891B2" : "#333333"}
+          emissiveIntensity={isActive ? 1.0 : 0.3}
+          transparent
+          opacity={isActive ? 0.9 : 0.5}
+        />
+      </mesh>
+
+      {/* Secondary perpendicular ring */}
+      <mesh rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[1.5, 0.06, 6, 24]} />
         <meshStandardMaterial
           color={isActive ? "#0891B2" : "#666666"}
           emissive={isActive ? "#0891B2" : "#333333"}
           emissiveIntensity={isActive ? 0.8 : 0.2}
           transparent
-          opacity={isActive ? 1 : 0.4}
+          opacity={isActive ? 0.7 : 0.4}
         />
       </mesh>
 
-      {/* Inner glowing core */}
-      <mesh scale={isActive ? 0.6 : 0.4}>
-        <sphereGeometry args={[1, 16, 16]} />
-        <meshStandardMaterial
-          color="#0891B2"
-          emissive="#0891B2"
-          emissiveIntensity={isActive ? 1.5 : 0.5}
+      {/* HUD corner brackets - 4 corners */}
+      {[0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2].map((angle, i) => {
+        const x = Math.cos(angle) * 1.8;
+        const z = Math.sin(angle) * 1.8;
+        return (
+          <group key={i} position={[x, 0, z]} rotation={[0, angle, 0]}>
+            {/* Vertical bracket line */}
+            <mesh position={[0, 0.3, 0]}>
+              <boxGeometry args={[0.08, 0.6, 0.08]} />
+              <meshStandardMaterial
+                color={isActive ? "#0891B2" : "#666666"}
+                emissive={isActive ? "#0891B2" : "#333333"}
+                emissiveIntensity={isActive ? 1.0 : 0.3}
+                transparent
+                opacity={isActive ? 0.9 : 0.5}
+              />
+            </mesh>
+            {/* Horizontal bracket line */}
+            <mesh position={[-0.3, 0.6, 0]}>
+              <boxGeometry args={[0.6, 0.08, 0.08]} />
+              <meshStandardMaterial
+                color={isActive ? "#0891B2" : "#666666"}
+                emissive={isActive ? "#0891B2" : "#333333"}
+                emissiveIntensity={isActive ? 1.0 : 0.3}
+                transparent
+                opacity={isActive ? 0.9 : 0.5}
+              />
+            </mesh>
+          </group>
+        );
+      })}
+
+      {/* Station Name - Integrated into center geometry */}
+      <Text
+        position={[0, 0, 0]}
+        fontSize={0.35}
+        color={isActive ? "#0891B2" : "#cccccc"}
+        anchorX="center"
+        anchorY="middle"
+        letterSpacing={0.1}
+        outlineWidth={0.02}
+        outlineColor="#000000"
+        outlineOpacity={0.8}
+      >
+        {section.name.toUpperCase()}
+      </Text>
+
+      {/* Glowing background plane for text */}
+      <mesh position={[0, 0, -0.1]}>
+        <planeGeometry args={[2.5, 0.8]} />
+        <meshBasicMaterial
+          color={isActive ? "#0891B2" : "#333333"}
           transparent
-          opacity={isActive ? 0.8 : 0.3}
+          opacity={isActive ? 0.15 : 0.08}
+          side={THREE.DoubleSide}
         />
       </mesh>
 
       {/* Ambient glow */}
       <pointLight
         color="#0891B2"
-        intensity={isActive ? 2 : 0.5}
-        distance={8}
+        intensity={isActive ? 3 : 0.8}
+        distance={10}
         decay={2}
       />
 
-      {/* Interactive label */}
-      <Html
-        center
-        distanceFactor={8}
-        position={[0, -2, 0]}
-        style={{
-          transition: 'all 0.3s ease',
-          pointerEvents: onNavigate ? 'auto' : 'none',
-          cursor: onNavigate ? 'pointer' : 'default',
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (onNavigate) onNavigate();
-        }}
-      >
-        <div
-          style={{
-            background: `linear-gradient(135deg, ${isActive ? '#0891B230' : '#66666620'}, ${isActive ? '#0891B240' : '#66666630'})`,
-            backdropFilter: 'blur(10px)',
-            borderRadius: '12px',
-            border: `2px solid ${isActive ? '#0891B2' : '#666666'}`,
-            boxShadow: `0 4px 20px ${isActive ? '#0891B250' : '#00000030'}`,
-            padding: '8px 16px',
-            minWidth: '120px',
-            textAlign: 'center',
-            opacity: isActive ? 1 : 0.7,
-            transform: isActive ? 'scale(1.1)' : 'scale(1)',
-          }}
-        >
-          <h3
-            style={{
-              color: isActive ? '#0891B2' : '#ffffff',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              margin: 0,
-              textTransform: 'capitalize',
-              textShadow: isActive ? '0 0 10px #0891B280' : 'none',
-            }}
-          >
-            {section.name}
-          </h3>
-        </div>
-      </Html>
-
-      {/* Particle ring for active section */}
+      {/* Particle field for active section */}
       {isActive && (
         <group>
-          {Array.from({ length: 16 }).map((_, i) => {
-            const angle = (i / 16) * Math.PI * 2;
-            const particleRadius = 2;
+          {Array.from({ length: 24 }).map((_, i) => {
+            const angle = (i / 24) * Math.PI * 2;
+            const particleRadius = 2.2;
+            const height = Math.sin(i * 0.8) * 0.4;
             return (
               <mesh
                 key={i}
                 position={[
                   Math.cos(angle) * particleRadius,
-                  Math.sin(i * 0.5) * 0.2,
+                  height,
                   Math.sin(angle) * particleRadius,
                 ]}
               >
-                <sphereGeometry args={[0.05, 8, 8]} />
+                <boxGeometry args={[0.06, 0.06, 0.06]} />
                 <meshBasicMaterial
                   color="#0891B2"
                   transparent
-                  opacity={0.6}
+                  opacity={0.7}
                 />
               </mesh>
             );
           })}
         </group>
+      )}
+
+      {/* Orbital data lines - connecting to center */}
+      {isActive && (
+        <>
+          {[0, Math.PI / 2, Math.PI, (Math.PI * 3) / 2].map((angle, i) => {
+            const length = 2.5;
+            return (
+              <group key={`line-${i}`} rotation={[0, angle, 0]}>
+                <mesh position={[length / 2, 0, 0]}>
+                  <boxGeometry args={[length, 0.02, 0.02]} />
+                  <meshBasicMaterial
+                    color="#0891B2"
+                    transparent
+                    opacity={0.4}
+                  />
+                </mesh>
+              </group>
+            );
+          })}
+        </>
       )}
     </group>
   );

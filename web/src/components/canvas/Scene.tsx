@@ -23,7 +23,12 @@ export default function Scene({
           powerPreference: "high-performance"
         }}
         dpr={[1, 2]} // Cap pixel ratio for performance
-        style={{ touchAction: 'none' }}
+        style={{ 
+          touchAction: 'pan-y', // Allow vertical scrolling but prevent horizontal pan
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          userSelect: 'none'
+        }}
       >
         {/* Lighting */}
         <ambientLight intensity={0.5} />

@@ -32,6 +32,7 @@ interface ProjectConstellationProps {
   onProjectClick?: (project: Project) => void;
   onProjectFocus?: (project: Project | null, position: [number, number, number]) => void;
   resetTrigger?: boolean;
+  autoFocusedIndex?: number | null;
 }
 
 // Different polyhedron types for variety - REFINED SCALE
@@ -43,12 +44,16 @@ const GEOMETRIES = [
 ];
 
 // Stable orbital configuration for projects
-const PROJECT_ORBIT_CONFIG = {
-  radius: 6,           // Fixed distance from centerpiece
-  height: 0,           // Y-position (level with centerpiece)
-  speed: 0.05,         // Consistent orbital speed
-  bobIntensity: 0.15,  // Subtle vertical bobbing
-  bobSpeed: 0.8,       // Bob frequency
+// Responsive based on viewport to keep projects visible on mobile
+const getOrbitConfig = () => {
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+  return {
+    radius: isMobile ? 3.5 : 6,  // Smaller orbit on mobile to stay in view
+    height: 0,                    // Y-position (level with centerpiece)
+    speed: 0.05,                  // Consistent orbital speed
+    bobIntensity: isMobile ? 0.1 : 0.15,  // Less bob on mobile
+    bobSpeed: 0.8,                // Bob frequency
+  };
 };
 
 export default function ProjectConstellation({
@@ -57,6 +62,7 @@ export default function ProjectConstellation({
   onProjectClick,
   onProjectFocus,
   resetTrigger,
+  autoFocusedIndex,
 }: ProjectConstellationProps) {
   const groupRef = useRef<THREE.Group>(null!);
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
@@ -68,6 +74,9 @@ export default function ProjectConstellation({
   const meshRefs = useRef<Map<number, THREE.Mesh>>(new Map());
   const { camera, size } = useThree();
 
+  // Get responsive orbit configuration
+  const orbitConfig = getOrbitConfig();
+
   // Calculate stable orbital positions - evenly spaced, predictable paths
   const projectOrbits = projects.map((_, index) => {
     // Even distribution around orbit (0°, 90°, 180°, 270°)
@@ -78,13 +87,13 @@ export default function ProjectConstellation({
     
     return {
       position: [
-        Math.cos(baseAngle) * PROJECT_ORBIT_CONFIG.radius,
-        PROJECT_ORBIT_CONFIG.height,
-        Math.sin(baseAngle) * PROJECT_ORBIT_CONFIG.radius,
+        Math.cos(baseAngle) * orbitConfig.radius,
+        orbitConfig.height,
+        Math.sin(baseAngle) * orbitConfig.radius,
       ] as [number, number, number],
       angle: baseAngle,
-      radius: PROJECT_ORBIT_CONFIG.radius,
-      speed: PROJECT_ORBIT_CONFIG.speed,
+      radius: orbitConfig.radius,
+      speed: orbitConfig.speed,
       bobPhase,
       geometry: GEOMETRIES[index % GEOMETRIES.length],
     };
@@ -155,9 +164,9 @@ export default function ProjectConstellation({
           child.position.z = THREE.MathUtils.lerp(child.position.z, newZ, 0.08);
           
           // Subtle vertical bobbing - each project has unique phase
-          const bobTime = state.clock.elapsedTime * PROJECT_ORBIT_CONFIG.bobSpeed + orbit.bobPhase;
-          const bobOffset = Math.sin(bobTime) * PROJECT_ORBIT_CONFIG.bobIntensity;
-          const targetY = PROJECT_ORBIT_CONFIG.height + bobOffset;
+          const bobTime = state.clock.elapsedTime * orbitConfig.bobSpeed + orbit.bobPhase;
+          const bobOffset = Math.sin(bobTime) * orbitConfig.bobIntensity;
+          const targetY = orbitConfig.height + bobOffset;
           
           child.position.y = THREE.MathUtils.lerp(child.position.y, targetY, 0.08);
         }
@@ -261,7 +270,8 @@ export default function ProjectConstellation({
         const orbit = projectOrbits[index];
         const isHovered = hoveredIndex === index;
         const isActive = activeIndex === index;
-        const isPending = pendingActivation === index; // Check if this project is pending activation
+        const isPending = pendingActivation === index;
+        const isAutoFocused = autoFocusedIndex === index; // Check if this project is auto-focused from scroll
         const GeometryComponent = orbit.geometry.type;
 
         return (
@@ -270,17 +280,17 @@ export default function ProjectConstellation({
             position={orbit.position}
           >
             {/* Connection line to center */}
-            {(isHovered || isActive || isPending) && (
+            {(isHovered || isActive || isPending || isAutoFocused) && (
               <Line
                 points={[
                   [0, 0, 0],
                   [-orbit.position[0], -orbit.position[1], -orbit.position[2]],
                 ]}
                 color={project.color}
-                lineWidth={isActive ? 2 : isPending ? 1.5 : 1}
+                lineWidth={isActive ? 2 : isPending ? 1.5 : isAutoFocused ? 1.3 : 1}
                 transparent
-                opacity={opacity * (isActive ? 0.6 : isPending ? 0.5 : 0.3)}
-                dashed={!(isActive || isPending)}
+                opacity={opacity * (isActive ? 0.6 : isPending ? 0.5 : isAutoFocused ? 0.55 : 0.3)}
+                dashed={!(isActive || isPending || isAutoFocused)}
                 dashScale={2}
                 gapSize={0.5}
               />
@@ -362,15 +372,15 @@ export default function ProjectConstellation({
                 wireframeLinewidth={3}
                 emissive={project.color}
                 emissiveIntensity={
-                  isActive ? 1.2 : isPending ? 1.0 : isHovered ? 0.8 : 0.4
+                  isActive ? 1.2 : isPending ? 1.0 : isAutoFocused ? 1.1 : isHovered ? 0.8 : 0.4
                 }
                 transparent
-                opacity={opacity * (isActive ? 1 : isPending ? 0.98 : isHovered ? 0.95 : 0.85)}
+                opacity={opacity * (isActive ? 1 : isPending ? 0.98 : isAutoFocused ? 0.96 : isHovered ? 0.95 : 0.85)}
               />
             </mesh>
 
             {/* Outer glow shell - ALWAYS visible for prominence */}
-            <mesh scale={isActive ? 2.0 : isPending ? 1.8 : isHovered ? 1.6 : 1.3}>
+            <mesh scale={isActive ? 2.0 : isPending ? 1.8 : isAutoFocused ? 1.75 : isHovered ? 1.6 : 1.3}>
                 {GeometryComponent === 'tetrahedron' && (
                   <tetrahedronGeometry args={orbit.geometry.args as [number, number]} />
                 )}
@@ -388,112 +398,134 @@ export default function ProjectConstellation({
                   color={project.color}
                   wireframe
                   transparent
-                  opacity={opacity * (isActive ? 0.4 : isPending ? 0.35 : isHovered ? 0.25 : 0.12)}
+                  opacity={opacity * (isActive ? 0.4 : isPending ? 0.35 : isAutoFocused ? 0.33 : isHovered ? 0.25 : 0.12)}
                 />
               </mesh>
 
             {/* Ambient light - always present for visibility */}
             <pointLight
               color={project.color}
-              intensity={isActive ? 2.5 : isPending ? 1.5 : isHovered ? 1.2 : 0.5}
+              intensity={isActive ? 2.5 : isPending ? 1.5 : isAutoFocused ? 2.0 : isHovered ? 1.2 : 0.5}
               distance={10}
               decay={2}
             />
 
-            {/* Holographic info panel - Show on hover, active, or pending */}
-            {(isHovered || isActive || isPending) && (
-              <Html
-                center
-                distanceFactor={6}
-                position={[0, 2, 0]}
-                sprite
+            {/* HUD nameplate - Always visible, expands on click */}
+            <Html
+              center
+              distanceFactor={6}
+              position={[0, 2, 0]}
+              sprite
+              style={{
+                transition: 'all 0.3s ease',
+                pointerEvents: 'none',
+              }}
+            >
+              <div 
                 style={{
-                  transition: 'all 0.3s ease',
-                  pointerEvents: 'none',
+                  position: 'relative',
+                  background: 'linear-gradient(135deg, #0a0a0a95, #1a1a1a90)',
+                  backdropFilter: 'blur(12px)',
+                  border: `2px solid ${project.color}80`,
+                  borderRadius: '4px',
+                  padding: (isActive || isAutoFocused) ? '12px' : '8px',
+                  minWidth: (isActive || isAutoFocused) ? '180px' : '140px',
+                  maxWidth: '240px',
+                  boxShadow: (isActive || isAutoFocused) 
+                    ? `0 0 30px ${project.color}60` 
+                    : `0 0 15px ${project.color}30`,
+                  fontFamily: '"Courier New", monospace',
+                  opacity: opacity,
+                  transform: (isActive || isAutoFocused) ? 'scale(1.05)' : 'scale(1)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
               >
-                <div 
-                  className="flex flex-col items-center gap-1 px-4 py-3"
+                {/* Corner Accents - only on active/auto-focused */}
+                {(isActive || isAutoFocused) && (
+                  <>
+                    <div style={{ position: 'absolute', top: '-2px', left: '-2px', width: '16px', height: '16px', borderTop: `3px solid ${project.color}`, borderLeft: `3px solid ${project.color}` }} />
+                    <div style={{ position: 'absolute', top: '-2px', right: '-2px', width: '16px', height: '16px', borderTop: `3px solid ${project.color}`, borderRight: `3px solid ${project.color}` }} />
+                    <div style={{ position: 'absolute', bottom: '-2px', left: '-2px', width: '16px', height: '16px', borderBottom: `3px solid ${project.color}`, borderLeft: `3px solid ${project.color}` }} />
+                    <div style={{ position: 'absolute', bottom: '-2px', right: '-2px', width: '16px', height: '16px', borderBottom: `3px solid ${project.color}`, borderRight: `3px solid ${project.color}` }} />
+                  </>
+                )}
+
+                {/* Title - Always shown */}
+                <h3 
                   style={{
-                    background: `linear-gradient(135deg, ${project.color}15, ${project.color}25)`,
-                    backdropFilter: 'blur(10px)',
-                    borderRadius: '12px',
-                    border: `1px solid ${project.color}40`,
-                    boxShadow: `0 8px 32px ${project.color}30`,
-                    minWidth: '160px',
-                    opacity: opacity * (isPending ? 0.9 : 1),
-                    transform: (isActive || isPending) ? 'scale(1.05)' : 'scale(1)',
+                    color: '#ffffff',
+                    fontSize: (isActive || isAutoFocused) ? '14px' : '12px',
+                    fontWeight: 'bold',
+                    margin: '0',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px',
+                    textShadow: `0 0 10px ${project.color}60`,
+                    textAlign: 'center',
                   }}
                 >
-                  {/* Title - Always shown when visible */}
-                  <h3 
-                    className="text-sm font-bold tracking-tight"
-                    style={{
-                      color: project.color,
-                      textShadow: `0 0 10px ${project.color}80`,
-                    }}
-                  >
-                    {project.title}
-                  </h3>
-                  
-                  {/* Subtitle - Always shown when visible */}
-                  <p 
-                    className="text-xs font-medium"
-                    style={{
-                      color: '#ffffff',
-                      opacity: 0.9,
-                    }}
-                  >
-                    {project.subtitle}
-                  </p>
-
-                  {/* Divider */}
-                  <div 
-                    className="h-px w-full my-1"
-                    style={{
-                      background: `linear-gradient(90deg, transparent, ${project.color}60, transparent)`,
-                    }}
-                  />
-
-                  {/* Action hint */}
-                  {isPending ? (
+                  {project.title}
+                </h3>
+                
+                {/* Expanded content - Only on active/auto-focused */}
+                {(isActive || isAutoFocused) && (
+                  <>
+                    {/* Subtitle */}
                     <p 
-                      className="text-[10px] font-semibold animate-pulse"
                       style={{
                         color: project.color,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
+                        fontSize: '11px',
+                        margin: '4px 0 8px 0',
+                        opacity: 0.9,
+                        fontWeight: '600',
+                        letterSpacing: '0.5px',
+                        textAlign: 'center',
                       }}
                     >
-                      🚀 Navigating...
+                      {project.subtitle}
                     </p>
-                  ) : activeSection === 'projects' && isActive ? (
-                    <p 
-                      className="text-[10px] font-semibold animate-pulse"
+
+                    {/* Divider */}
+                    <div 
                       style={{
+                        height: '1px',
+                        background: `linear-gradient(90deg, transparent, ${project.color}60, transparent)`,
+                        margin: '8px 0',
+                      }}
+                    />
+
+                    {/* Action hint */}
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        padding: '6px 8px',
+                        background: `${project.color}15`,
+                        border: `1px solid ${project.color}40`,
+                        borderRadius: '2px',
                         color: project.color,
+                        fontSize: '9px',
+                        fontWeight: 'bold',
+                        letterSpacing: '1px',
                         textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
                       }}
                     >
-                      ✨ Click to visit
-                    </p>
-                  ) : (
-                    <p 
-                      className="text-[10px]"
-                      style={{
-                        color: '#ffffff',
-                        opacity: 0.6,
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.1em',
-                      }}
-                    >
-                      Click to view projects
-                    </p>
-                  )}
-                </div>
-              </Html>
-            )}
+                      {isPending ? 'NAVIGATING' : 'CLICK TO VISIT'}
+                    </div>
+                  </>
+                )}
+
+                {/* Noise Overlay */}
+                <div style={{
+                  position: 'absolute',
+                  inset: 0,
+                  background: 'repeating-linear-gradient(0deg, transparent, transparent 2px, #ffffff02 2px, #ffffff02 4px)',
+                  pointerEvents: 'none',
+                  opacity: 0.3,
+                  borderRadius: '4px',
+                }} />
+              </div>
+            </Html>
 
             {/* Particle burst on active or pending */}
             {(isActive || isPending) && (

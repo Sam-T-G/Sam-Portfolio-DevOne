@@ -3,10 +3,9 @@ import { useRef, useState } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { Float } from '@react-three/drei';
 import * as THREE from 'three';
-import ProjectConstellation from './ProjectConstellation';
+import CinematicShowcase from './CinematicShowcase';
 import SpatialInstructions from './SpatialInstructions';
 import AmbientGeometry from './AmbientGeometry';
-import OrbitalSectionStation from './OrbitalSectionStation';
 
 interface Project {
   id: number;
@@ -46,7 +45,7 @@ export const ORBITAL_CONFIG = {
   sectionRadius: 10,       // Section orbital station distance
   height: 2,               // Camera height variation
   sections: {
-    hero: { angle: 0, height: 1 },           // Front (0°)
+    home: { angle: 0, height: 1 },           // Front (0°)
     projects: { angle: Math.PI / 2, height: 0.5 },     // Right (90°)
     skills: { angle: Math.PI, height: 1.5 },           // Back (180°)
     contact: { angle: (Math.PI * 3) / 2, height: 0 },  // Left (270°)
@@ -54,20 +53,22 @@ export const ORBITAL_CONFIG = {
 };
 
 // Define camera choreography for each section as orbital waypoints
+// Camera positioned at 2/3 horizontal offset from each station for comfortable viewing
 const CAMERA_CHOREOGRAPHY: Record<string, {
   entry: CameraWaypoint;
   exit: CameraWaypoint;
   easing?: (t: number) => number;
 }> = {
-  hero: {
+  home: {
     entry: {
-      position: [0, 1, 12],  // Front view
+      // Station at (10, 1, 0) - Camera offset right side
+      position: [8, 1.5, 5],  // Right offset, comfortable distance
       lookAt: [0, 0, 0],
       rotationSpeed: 1.0,
       floatIntensity: 0.5,
     },
     exit: {
-      position: [6, 0.75, 10.4],  // Transitioning to right
+      position: [6, 1.25, 7],  // Transitioning toward projects
       lookAt: [0, 0, 0],
       rotationSpeed: 1.2,
       floatIntensity: 0.4,
@@ -79,13 +80,14 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   projects: {
     entry: {
-      position: [6, 0.75, 10.4],  // Arriving from front
+      // Station at (0, 0.5, 10) - Camera offset left side
+      position: [-5, 1, 8],  // Left offset for variety
       lookAt: [0, 0, 0],
       rotationSpeed: 1.2,
       floatIntensity: 0.4,
     },
     exit: {
-      position: [10.4, 1.125, -6],  // Transitioning to back
+      position: [-7, 1.5, 6],  // Transitioning toward skills
       lookAt: [0, 0, 0],
       rotationSpeed: 1.4,
       floatIntensity: 0.3,
@@ -97,13 +99,14 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   skills: {
     entry: {
-      position: [10.4, 1.125, -6],  // Arriving from right
+      // Station at (-10, 1.5, 0) - Camera offset right side
+      position: [-8, 2, 5],  // Right offset, elevated view
       lookAt: [0, 0, 0],
       rotationSpeed: 1.4,
       floatIntensity: 0.3,
     },
     exit: {
-      position: [-6, 0.375, -10.4],  // Transitioning to left
+      position: [-6, 1.75, 3],  // Transitioning toward contact
       lookAt: [0, 0, 0],
       rotationSpeed: 1.6,
       floatIntensity: 0.25,
@@ -117,13 +120,14 @@ const CAMERA_CHOREOGRAPHY: Record<string, {
   },
   contact: {
     entry: {
-      position: [-6, 0.375, -10.4],  // Arriving from back
+      // Station at (0, 0, -10) - Camera offset left side
+      position: [5, 1, -8],  // Left offset for final section
       lookAt: [0, 0, 0],
       rotationSpeed: 1.6,
       floatIntensity: 0.25,
     },
     exit: {
-      position: [-10.4, 0.625, 6],  // Completing orbit back to front
+      position: [7, 1.25, -6],  // Completing orbit back to home
       lookAt: [0, 0, 0],
       rotationSpeed: 1.3,
       floatIntensity: 0.4,
@@ -145,48 +149,26 @@ export default function ChoreographedGeometry({
   onProjectFocus,
   resetTrigger,
 }: ChoreographedGeometryProps) {
-  const meshRef = useRef<THREE.Mesh>(null!);
+  const meshRef = useRef<THREE.Group>(null!);
   const { camera } = useThree();
   
   const targetCameraPos = useRef(new THREE.Vector3(0, 0, 5));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
-  const focusCameraPos = useRef(new THREE.Vector3());
-  const focusLookAt = useRef(new THREE.Vector3());
   const currentRotationSpeed = useRef(1.0);
   const [floatIntensity, setFloatIntensity] = useState(0.5);
+
+  // Check if we're in a project section
+  const isProjectSection = activeSection.startsWith('project-');
+
 
   useFrame((state) => {
     if (!meshRef.current) return;
 
-    // Check if we're in focus mode
-    if (focusedProject) {
-      // FOCUS MODE: Camera looks at selected polyhedron
-      const [x, y, z] = focusedProject.position;
-      
-      // Calculate tasteful off-center camera position
-      // Position camera closer and to the side for dramatic view
-      const cameraOffset = new THREE.Vector3(
-        x + 2.5,  // Offset to the right
-        y + 1.5,  // Slightly above
-        z + 3.5   // Closer to viewer
-      );
-      
-      focusCameraPos.current.copy(cameraOffset);
-      focusLookAt.current.set(x, y, z);
-      
-      // Smooth transition to focus position
-      camera.position.lerp(focusCameraPos.current, 0.08);
-      
-      // Create a smooth lookAt with slight damping
-      const currentLookAt = new THREE.Vector3();
-      camera.getWorldDirection(currentLookAt);
-      currentLookAt.multiplyScalar(10).add(camera.position);
-      currentLookAt.lerp(focusLookAt.current, 0.08);
-      camera.lookAt(currentLookAt);
-      
-    } else {
+    // Only apply camera choreography for non-project sections
+    // Project sections handled by CinematicShowcase
+    if (!isProjectSection) {
       // SCROLL MODE: Normal choreographed camera movement
-      const choreography = CAMERA_CHOREOGRAPHY[activeSection] || CAMERA_CHOREOGRAPHY.hero;
+      const choreography = CAMERA_CHOREOGRAPHY[activeSection] || CAMERA_CHOREOGRAPHY.home;
       const easing = choreography.easing || ((t: number) => t);
       
       // Apply easing to section progress
@@ -266,7 +248,7 @@ export default function ChoreographedGeometry({
   const navigateToSection = (sectionName: string) => {
     const vh = window.innerHeight;
     const sectionMap: Record<string, number> = {
-      hero: 0,
+      home: 0,
       projects: vh,
       skills: vh * 2,
       contact: vh * 3,
@@ -280,17 +262,6 @@ export default function ChoreographedGeometry({
 
   return (
     <>
-      {/* Orbital Section Stations - Cardinal positioned markers */}
-      {Object.entries(ORBITAL_CONFIG.sections).map(([name, config]) => (
-        <OrbitalSectionStation
-          key={name}
-          section={{ name, ...config }}
-          radius={ORBITAL_CONFIG.sectionRadius}
-          activeSection={activeSection}
-          onNavigate={() => navigateToSection(name)}
-        />
-      ))}
-
       {/* Spatial Instructions - Exist in 3D Space */}
       <SpatialInstructions 
         activeSection={activeSection}
@@ -303,14 +274,13 @@ export default function ChoreographedGeometry({
         sectionProgress={sectionProgress}
       />
 
-      {/* Project Constellation - Stable Orbital System */}
+      {/* Cinematic Project Showcase - Each project gets center stage */}
       {projects.length > 0 && (
-        <ProjectConstellation
+        <CinematicShowcase
           projects={projects}
           activeSection={activeSection}
+          sectionProgress={sectionProgress}
           onProjectClick={onProjectClick}
-          onProjectFocus={onProjectFocus}
-          resetTrigger={resetTrigger}
         />
       )}
 
