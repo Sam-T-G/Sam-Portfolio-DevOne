@@ -16,8 +16,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Samuel Gerungan | Full-Stack Developer & AI Enthusiast",
-  description: "Computer Science student at Riverside City College specializing in full-stack development, AI integration, and competitive programming. Research assistant exploring runtime optimization.",
+  title: "Samuel Gerungan | ML Engineer & Full-Stack Developer",
+  description: "Computer Science student specializing in machine learning and full-stack development. Experience fine-tuning LLMs (GPT-OSS 20B), building real-time systems, and creating AI applications with Google Gemini and Claude.",
 };
 
 export default function RootLayout({
