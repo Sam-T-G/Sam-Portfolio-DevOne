@@ -55,9 +55,10 @@ export default function CinematicProject({
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Dynamic X position: centered on mobile, offset on tablet/desktop
-  // Mobile needs more negative offset to account for camera perspective and truly center
-  const panelXPosition = isMobile ? -0.6 : -0.3;
+  // Dynamic X position: centered on mobile, offset left on desktop for better composition
+  // Mobile: 0 = perfectly centered with 3D object
+  // Desktop: -0.3 = offset left to create visual interest and avoid overlap
+  const panelXPosition = isMobile ? 0 : -0.3;
 
   // Select geometry based on project ID for consistency
   const geometry = useMemo(() => {
