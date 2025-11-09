@@ -77,30 +77,36 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             transform: scale(0.8);
             transform-origin: top center;
             margin-top: -8px;
-            min-height: auto;
-            max-height: 110px;
-            overflow: hidden;
-            padding: 14px 18px !important;
+            padding: 10px 16px !important;
+          }
+          
+          .section-indicator-responsive .location-header {
+            font-size: 9px !important;
           }
           
           .section-indicator-responsive .section-label {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            line-height: 1.25;
+            font-size: 16px !important;
+            letter-spacing: 2px !important;
           }
           
           .section-indicator-responsive .section-subtitle {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 100%;
-            line-height: 1.35;
+            font-size: 10px !important;
           }
           
           .section-indicator-responsive .icon {
-            flex-shrink: 0;
+            font-size: 20px !important;
+          }
+          
+          /* Reduce internal spacing on mobile */
+          .section-indicator-responsive .hud-container > div:first-of-type {
+            gap: 6px !important;
+            margin-bottom: 5px !important;
+            padding-bottom: 5px !important;
+          }
+          
+          .section-indicator-responsive .hud-container > div:nth-of-type(2) {
+            gap: 8px !important;
+            margin-bottom: 4px !important;
           }
         }
         
