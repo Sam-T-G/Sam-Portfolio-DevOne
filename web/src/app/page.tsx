@@ -220,7 +220,7 @@ export default function Home() {
       <div className="h-96" aria-hidden="true" />
 
       {/* Contact - Floating in Space */}
-      <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-16 pb-32" style={{ scrollMarginTop: '120px' }}>
+      <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-32 pb-32" style={{ scrollMarginTop: '120px' }}>
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Email */}
