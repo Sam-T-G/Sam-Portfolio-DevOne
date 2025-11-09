@@ -189,9 +189,9 @@ export default function Home() {
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {[
-              { category: "Languages", skills: ["C++", "TypeScript", "Python", "JavaScript", "HTML", "CSS"] },
-              { category: "Frameworks & Tools", skills: ["React", "Next.js", "Node.js", "Docker", "Git", "Google Cloud Suite", "AWS"] },
-              { category: "Specializations", skills: ["AI Integration", "Full-Stack Development", "Data Structures", "Algorithms", "RESTful APIs"] },
+              { category: "Languages", skills: ["Python", "TypeScript", "JavaScript", "C++", "SQL", "HTML/CSS"] },
+              { category: "Frameworks & Libraries", skills: ["React", "Next.js", "Node.js", "Express", "PyTorch", "Three.js", "Socket.io"] },
+              { category: "Technical Skills", skills: ["Machine Learning", "LLM Fine-Tuning", "Real-Time Systems", "WebGL/3D Graphics", "REST APIs", "Database Design"] },
             ].map((group) => (
               <div
                 key={group.category}
