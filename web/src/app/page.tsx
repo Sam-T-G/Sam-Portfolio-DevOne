@@ -187,10 +187,6 @@ export default function Home() {
       {/* Skills - Floating in Space */}
       <section id="skills" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-24 pb-40" style={{ scrollMarginTop: '120px' }}>
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
-          <h2 className="mb-12 text-3xl font-semibold text-brand-teal">
-            Skills / Tech Stack
-          </h2>
-          
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {[
               { category: "Languages", skills: ["C++", "TypeScript", "Python", "JavaScript", "HTML", "CSS"] },
@@ -226,13 +222,6 @@ export default function Home() {
       {/* Contact - Floating in Space */}
       <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-16 pb-32" style={{ scrollMarginTop: '120px' }}>
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
-          <div className="max-w-2xl">
-            <h2 className="mb-4 text-3xl font-semibold text-brand-orange">Contact</h2>
-            <p className="mb-8 text-zinc-700">
-              Reach me directly via any of the links below.
-            </p>
-          </div>
-
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {/* Email */}
             <a
