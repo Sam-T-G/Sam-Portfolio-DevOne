@@ -78,7 +78,9 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             transform-origin: top center;
             margin-top: -8px;
             min-height: auto;
-            max-height: 90px;
+            max-height: 110px;
+            overflow: hidden;
+            padding: 14px 18px !important;
           }
           
           .section-indicator-responsive .section-label {
@@ -86,7 +88,7 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
-            line-height: 1.2;
+            line-height: 1.25;
           }
           
           .section-indicator-responsive .section-subtitle {
@@ -94,7 +96,11 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             overflow: hidden;
             text-overflow: ellipsis;
             max-width: 100%;
-            line-height: 1.3;
+            line-height: 1.35;
+          }
+          
+          .section-indicator-responsive .icon {
+            flex-shrink: 0;
           }
         }
         
