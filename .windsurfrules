@@ -1,0 +1,8 @@
+# Project Rules
+
+## Documentation Organization
+- All Markdown (.md) files MUST be placed in the `llm-notes/` folder
+- Exception: README.md in the root directory (project overview)
+- Exception: LICENSE file (if in markdown format)
+- This keeps documentation organized and prevents root directory clutter
+- LLM notes folder is gitignored to keep repository clean
