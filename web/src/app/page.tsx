@@ -7,6 +7,7 @@ import HUDManager from "@/components/canvas/HUDManager";
 import SectionIndicator from "@/components/canvas/SectionIndicator";
 import TimelineNavigation from "@/components/canvas/TimelineNavigation";
 import SwipeIndicator from "@/components/ui/SwipeIndicator";
+import ThemeToggle from "@/components/ThemeToggle";
 import { useMobileTouch } from "@/hooks/useMobileTouch";
 import { navigateToNextSection, navigateToPreviousSection } from "@/utils/sectionNavigation";
 
@@ -84,7 +85,7 @@ export default function Home() {
   });
 
   return (
-    <div ref={containerRef} className="relative bg-gradient-to-b from-[#f5f5f5] via-[#fafafa] to-[#f0f0f0]" style={{ scrollSnapType: 'y proximity' }}>
+    <div ref={containerRef} className="relative bg-gradient-to-b from-[var(--gradient-from)] via-[var(--gradient-via)] to-[var(--gradient-to)]" style={{ scrollSnapType: 'y proximity' }}>
       {/* Permanent 3D Background - Unified Spatial Experience */}
       <PermanentSceneBackground 
         projects={projects}
@@ -108,6 +109,11 @@ export default function Home() {
 
       {/* Timeline Navigation - Right Side */}
       <TimelineNavigation activeSection={activeSection} projects={projects} />
+
+      {/* Theme Toggle - Bottom Right */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <ThemeToggle />
+      </div>
 
       {/* Mobile Swipe Indicator - Shows on first mobile visit */}
       <SwipeIndicator />
@@ -195,7 +201,7 @@ export default function Home() {
             ].map((group) => (
               <div
                 key={group.category}
-                className="group rounded-2xl border border-brand-teal/20 bg-white/80 p-6 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:border-brand-teal/40 hover:shadow-xl hover:shadow-brand-teal/10"
+                className="group rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/80 dark:bg-zinc-900/80 p-6 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:border-brand-teal/40 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/10 dark:hover:shadow-brand-teal/30"
               >
                 <h3 className="mb-4 text-lg font-semibold text-brand-orange">
                   {group.category}
@@ -204,7 +210,7 @@ export default function Home() {
                   {group.skills.map((skill) => (
                     <span
                       key={skill}
-                      className="rounded-full border border-brand-teal/30 bg-brand-mint/10 px-3 py-1.5 text-sm text-brand-teal transition-colors hover:bg-brand-teal/20"
+                      className="rounded-full border border-brand-teal/30 dark:border-brand-teal/50 bg-brand-mint/10 dark:bg-brand-teal/20 px-3 py-1.5 text-sm text-brand-teal dark:text-teal-300 transition-colors hover:bg-brand-teal/20 dark:hover:bg-brand-teal/30"
                     >
                       {skill}
                     </span>
@@ -226,14 +232,14 @@ export default function Home() {
             {/* Email */}
             <a
               href="mailto:samuelgerungan@gmail.com"
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
+              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/20 dark:hover:shadow-brand-teal/30"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">Email</p>
-                <p className="font-medium text-zinc-800">samuelgerungan@gmail.com</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">samuelgerungan@gmail.com</p>
               </div>
             </a>
 
@@ -242,14 +248,14 @@ export default function Home() {
               href="https://github.com/sam-t-g"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
+              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/20 dark:hover:shadow-brand-teal/30"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.799 8.206 11.387.6.111.82-.261.82-.58 0-.287-.011-1.243-.017-2.255-3.338.726-4.042-1.416-4.042-1.416-.546-1.387-1.333-1.757-1.333-1.757-1.089-.745.083-.73.083-.73 1.205.085 1.84 1.237 1.84 1.237 1.07 1.834 2.807 1.304 3.492.997.109-.775.418-1.304.76-1.604-2.665-.303-5.466-1.332-5.466-5.93 0-1.31.469-2.382 1.237-3.221-.124-.303-.536-1.523.117-3.176 0 0 1.008-.322 3.301 1.23a11.48 11.48 0 0 1 3.004-.404c1.019.005 2.046.138 3.003.404 2.293-1.552 3.3-1.23 3.3-1.23.654 1.653.242 2.873.119 3.176.77.839 1.236 1.911 1.236 3.221 0 4.61-2.804 5.625-5.475 5.921.43.371.814 1.102.814 2.222 0 1.604-.015 2.896-.015 3.29 0 .321.216.697.825.579C20.565 21.796 24 17.297 24 12 24 5.37 18.627 0 12 0z"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">GitHub</p>
-                <p className="font-medium text-zinc-800">github.com/sam-t-g</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">github.com/sam-t-g</p>
               </div>
             </a>
 
@@ -258,50 +264,50 @@ export default function Home() {
               href="https://linkedin.com/in/samuelgerungan"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
+              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/20 dark:hover:shadow-brand-teal/30"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452H17.21v-5.569c0-1.328-.027-3.036-1.849-3.036-1.853 0-2.136 1.447-2.136 2.943v5.662H9.0V9h3.112v1.561h.044c.434-.82 1.494-1.686 3.074-1.686 3.29 0 3.897 2.164 3.897 4.98v6.597zM5.337 7.433a1.805 1.805 0 1 1 0-3.61 1.805 1.805 0 0 1 0 3.61zM6.9 20.452H3.77V9H6.9v11.452z"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">LinkedIn</p>
-                <p className="font-medium text-zinc-800">linkedin.com/in/samuelgerungan</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">linkedin.com/in/samuelgerungan</p>
               </div>
             </a>
 
             {/* Phone */}
             <a
               href="tel:+19098106275"
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
+              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/20 dark:hover:shadow-brand-teal/30"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">Phone</p>
-                <p className="font-medium text-zinc-800">(909) 810-6275</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">(909) 810-6275</p>
               </div>
             </a>
 
             {/* Location */}
-            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm">
+            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">Location</p>
-                <p className="font-medium text-zinc-800">San Bernardino, CA</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">San Bernardino, CA</p>
               </div>
             </div>
 
             {/* Education */}
-            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm">
+            <div className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm">
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">Education</p>
-                <p className="font-medium text-zinc-800">Riverside City College</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">Riverside City College</p>
               </div>
             </div>
 
@@ -310,14 +316,14 @@ export default function Home() {
               href="/Samuel_Gerungan_Resume.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 bg-white/90 p-5 shadow-lg shadow-brand-teal/5 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 hover:shadow-xl hover:shadow-brand-teal/20"
+              className="group flex items-center gap-4 rounded-2xl border border-brand-teal/20 dark:border-brand-teal/40 bg-white/90 dark:bg-zinc-900/90 p-5 shadow-lg shadow-brand-teal/5 dark:shadow-brand-teal/20 backdrop-blur-sm transition-all hover:-translate-y-2 hover:border-brand-teal/50 dark:hover:border-brand-teal/60 hover:shadow-xl hover:shadow-brand-teal/20 dark:hover:shadow-brand-teal/30"
             >
               <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand-teal/10 text-brand-teal transition-colors group-hover:bg-brand-teal group-hover:text-white">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
               </span>
               <div>
                 <p className="text-sm text-brand-orange">Resume</p>
-                <p className="font-medium text-zinc-800">View Resume</p>
+                <p className="font-medium text-zinc-800 dark:text-zinc-200">View Resume</p>
               </div>
             </a>
           </div>
