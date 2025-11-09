@@ -185,7 +185,7 @@ export default function Home() {
       <div className="h-screen" aria-hidden="true" />
 
       {/* Skills - Floating in Space */}
-      <section id="skills" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-24 pb-40">
+      <section id="skills" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-24 pb-40" style={{ scrollMarginTop: '120px' }}>
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
           <h2 className="mb-12 text-3xl font-semibold text-brand-teal">
             Skills / Tech Stack
@@ -224,7 +224,7 @@ export default function Home() {
       <div className="h-96" aria-hidden="true" />
 
       {/* Contact - Floating in Space */}
-      <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-16 pb-32">
+      <section id="contact" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center pt-16 pb-32" style={{ scrollMarginTop: '120px' }}>
         <div className="pointer-events-auto mx-auto max-w-6xl px-6 py-16">
           <div className="max-w-2xl">
             <h2 className="mb-4 text-3xl font-semibold text-brand-orange">Contact</h2>
