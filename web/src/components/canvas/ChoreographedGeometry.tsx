@@ -149,17 +149,17 @@ export default function ChoreographedGeometry({
   onProjectFocus,
   resetTrigger,
 }: ChoreographedGeometryProps) {
-  const meshRef = useRef<THREE.Group>(null!);
   const { camera } = useThree();
-  
+  const meshRef = useRef<THREE.Mesh>(null!);
+  const glowRef = useRef<THREE.Mesh>(null!);
+  const [cameraLerpSpeed] = useState(0.05); // Smooth camera movement
+  const [floatIntensity, setFloatIntensity] = useState(0.5);
   const targetCameraPos = useRef(new THREE.Vector3(0, 0, 5));
   const targetLookAt = useRef(new THREE.Vector3(0, 0, 0));
   const currentRotationSpeed = useRef(1.0);
-  const [floatIntensity, setFloatIntensity] = useState(0.5);
 
   // Check if we're in a project section
   const isProjectSection = activeSection.startsWith('project-');
-
 
   useFrame((state) => {
     if (!meshRef.current) return;
@@ -231,16 +231,52 @@ export default function ChoreographedGeometry({
     meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.2;
 
     // Add subtle pulsing effect in contact section
-    if (activeSection === 'contact') {
-      const pulse = Math.sin(state.clock.elapsedTime * 0.8) * 0.03;
-      meshRef.current.scale.setScalar(1 + pulse);
-    } else {
-      // Smoothly return to normal scale
-      const currentScale = meshRef.current.scale.x;
+    if (meshRef.current) {
+      // Gentle continuous rotation
+      meshRef.current.rotation.y += 0.001 * state.clock.elapsedTime * 0.1;
+      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.2) * 0.1;
+
+      // Pulsing scale for visual interest
+      const pulse = Math.sin(state.clock.elapsedTime * 0.5) * 0.05 + 1;
       const targetScale = 1.0;
       meshRef.current.scale.setScalar(
-        THREE.MathUtils.lerp(currentScale, targetScale, 0.1)
+        THREE.MathUtils.lerp(meshRef.current.scale.x, targetScale, 0.1)
       );
+      
+      // Pulsing glow effect - ONLY active on home/About Me section
+      const isHome = activeSection === 'home';
+      if (isHome) {
+        const pulseSpeed = 1.5;
+        const pulseIntensity = Math.sin(state.clock.elapsedTime * pulseSpeed) * 0.6 + 1.2; // Range: 0.6 to 1.8
+        
+        // Update material emissive intensity for main mesh
+        if (meshRef.current.material instanceof THREE.MeshStandardMaterial) {
+          meshRef.current.material.emissiveIntensity = pulseIntensity;
+        }
+        
+        // Update glow shell
+        if (glowRef.current && glowRef.current.material instanceof THREE.MeshBasicMaterial) {
+          glowRef.current.material.opacity = 0.2 + pulseIntensity * 0.15;
+          glowRef.current.rotation.y = meshRef.current.rotation.y;
+          glowRef.current.rotation.x = meshRef.current.rotation.x;
+        }
+      } else {
+        // Fade out glow when not on home section
+        if (meshRef.current.material instanceof THREE.MeshStandardMaterial) {
+          meshRef.current.material.emissiveIntensity = THREE.MathUtils.lerp(
+            meshRef.current.material.emissiveIntensity,
+            0.3,
+            0.05
+          );
+        }
+        if (glowRef.current && glowRef.current.material instanceof THREE.MeshBasicMaterial) {
+          glowRef.current.material.opacity = THREE.MathUtils.lerp(
+            glowRef.current.material.opacity,
+            0,
+            0.05
+          );
+        }
+      }
     }
   });
 
@@ -284,22 +320,37 @@ export default function ChoreographedGeometry({
         />
       )}
 
-      {/* Central Octahedron - The Anchor */}
+      {/* Central Octahedron - The Anchor with Pulsing Glow */}
       <Float
         speed={1.5}
         rotationIntensity={0.3}
         floatIntensity={floatIntensity}
       >
-      <mesh ref={meshRef}>
-        <octahedronGeometry args={[3, 0]} />
-        <meshStandardMaterial 
-          color="#0891B2"
-          wireframe
-          wireframeLinewidth={2}
-          emissive="#0891B2"
-          emissiveIntensity={Math.min(scrollProgress * 0.3, 0.3)}
-        />
-      </mesh>
+        {/* Main octahedron with emissive glow */}
+        <mesh ref={meshRef}>
+          <octahedronGeometry args={[3, 0]} />
+          <meshStandardMaterial 
+            color="#0891B2"
+            wireframe
+            wireframeLinewidth={2}
+            emissive="#0891B2"
+            emissiveIntensity={1.2}
+            transparent
+            opacity={0.95}
+          />
+        </mesh>
+        
+        {/* Outer glow shell for enhanced pulsing effect */}
+        <mesh ref={glowRef} scale={1.25}>
+          <octahedronGeometry args={[3, 0]} />
+          <meshBasicMaterial
+            color="#0891B2"
+            wireframe
+            transparent
+            opacity={0}
+            depthWrite={false}
+          />
+        </mesh>
       
       {/* Add ambient particles that follow camera */}
       {activeSection === 'skills' && (
