@@ -40,8 +40,8 @@ const projects = [
     subtitle: "Developer Messaging Platform", 
     color: "#F59E0B", 
     link: "https://github.com/sam-t-g/fullchat",
-    description: "Real-time communication platform built for developers, featuring Socket.io-powered messaging, MySQL database architecture, and dynamic routing. Designed as a dedicated space for the developer community to collaborate and connect in real-time.",
-    mobileDescription: "Real-time messaging platform with Socket.io-powered communication and MySQL database architecture for developers.",
+    description: "Real-time communication platform built for developers from the ground up without modern React frameworks. An exercise in creating a responsive, modern instant messaging system using Socket.io-powered messaging, MySQL database architecture, and dynamic routing. Designed as a dedicated space for the developer community to collaborate and connect in real-time.",
+    mobileDescription: "Ground-up instant messaging system built without modern React frameworks, featuring Socket.io real-time communication and MySQL architecture.",
     tags: ["Socket.io", "Express", "MySQL", "Node.js"]
   },
   { 
@@ -50,8 +50,8 @@ const projects = [
     subtitle: "Gamified Social Impact App", 
     color: "#8B5CF6",
     link: "https://github.com/sam-t-g/calhacks25",
-    description: "Cal Hacks 25 project combining AI-driven activity generation with gamification mechanics. Features Claude-powered personalized tasks, photo verification system, and an interactive voice assistant companion. Earn XP by completing real-world social good activities.",
-    mobileDescription: "Claude AI-powered app generating personalized social impact tasks with voice assistant and gamification mechanics.",
+    description: "Cal Hacks 25 project featuring a unified low-latency context window between Claude AI, Poke by Interaction Co, and LiveKit for seamless voice interaction. Combines AI-driven activity generation with gamification mechanics, photo verification system, and an interactive voice assistant companion. Earn XP by completing real-world social good activities.",
+    mobileDescription: "Unified low-latency context window between Claude AI, Poke, and LiveKit for seamless voice-powered social impact task generation.",
     tags: ["Claude AI", "Next.js", "LiveKit", "Voice AI"],
     hackathon: "UC Berkeley Cal Hacks 2025"
   },
