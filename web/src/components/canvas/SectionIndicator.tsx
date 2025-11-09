@@ -71,31 +71,54 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
       className="section-indicator-responsive"
     >
       <style>{`
-        /* Mobile: Explicit margins for proper spacing and visual balance */
+        /* Mobile: Explicit margins for proper spacing and visual balance - 20% smaller */
         .section-indicator-responsive .hud-container {
-          padding: 16px 20px;
-          min-width: 300px;
-          max-width: 86vw;
-          width: 86vw;
+          padding: 13px 16px;
+          min-width: 240px;
+          max-width: 69vw;
+          width: 69vw;
           margin: 0 7vw;
           box-sizing: border-box;
         }
         
         .section-indicator-responsive .location-header {
-          font-size: 12px;
+          font-size: 10px;
         }
         
         .section-indicator-responsive .section-label {
-          font-size: 22px;
-          letter-spacing: 2.5px;
+          font-size: 18px;
+          letter-spacing: 2px;
         }
         
         .section-indicator-responsive .section-subtitle {
-          font-size: 13px;
+          font-size: 10px;
         }
         
         .section-indicator-responsive .icon {
-          font-size: 28px;
+          font-size: 22px;
+        }
+        
+        /* Mobile: Reduce decorative elements by 20% */
+        .section-indicator-responsive .corner-accent {
+          width: 19px !important;
+          height: 19px !important;
+          border-width: 4px !important;
+        }
+        
+        .section-indicator-responsive .pulse-dot {
+          width: 6px !important;
+          height: 6px !important;
+        }
+        
+        .section-indicator-responsive .header-section {
+          gap: 6px !important;
+          margin-bottom: 6px !important;
+          padding-bottom: 6px !important;
+        }
+        
+        .section-indicator-responsive .content-section {
+          gap: 10px !important;
+          margin-bottom: 6px !important;
         }
         
         /* Tablet: Transitional sizing with generous margins */
@@ -204,10 +227,10 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
         `}</style>
 
         {/* Corner Accents */}
-        <div style={{ position: 'absolute', top: '-3px', left: '-3px', width: '24px', height: '24px', borderTop: `5px solid ${currentSection.color || '#0891B2'}`, borderLeft: `5px solid ${currentSection.color || '#0891B2'}` }} />
-        <div style={{ position: 'absolute', top: '-3px', right: '-3px', width: '24px', height: '24px', borderTop: `5px solid ${currentSection.color || '#0891B2'}`, borderRight: `5px solid ${currentSection.color || '#0891B2'}` }} />
-        <div style={{ position: 'absolute', bottom: '-3px', left: '-3px', width: '24px', height: '24px', borderBottom: `5px solid ${currentSection.color || '#0891B2'}`, borderLeft: `5px solid ${currentSection.color || '#0891B2'}` }} />
-        <div style={{ position: 'absolute', bottom: '-3px', right: '-3px', width: '24px', height: '24px', borderBottom: `5px solid ${currentSection.color || '#0891B2'}`, borderRight: `5px solid ${currentSection.color || '#0891B2'}` }} />
+        <div className="corner-accent" style={{ position: 'absolute', top: '-3px', left: '-3px', width: '24px', height: '24px', borderTop: `5px solid ${currentSection.color || '#0891B2'}`, borderLeft: `5px solid ${currentSection.color || '#0891B2'}` }} />
+        <div className="corner-accent" style={{ position: 'absolute', top: '-3px', right: '-3px', width: '24px', height: '24px', borderTop: `5px solid ${currentSection.color || '#0891B2'}`, borderRight: `5px solid ${currentSection.color || '#0891B2'}` }} />
+        <div className="corner-accent" style={{ position: 'absolute', bottom: '-3px', left: '-3px', width: '24px', height: '24px', borderBottom: `5px solid ${currentSection.color || '#0891B2'}`, borderLeft: `5px solid ${currentSection.color || '#0891B2'}` }} />
+        <div className="corner-accent" style={{ position: 'absolute', bottom: '-3px', right: '-3px', width: '24px', height: '24px', borderBottom: `5px solid ${currentSection.color || '#0891B2'}`, borderRight: `5px solid ${currentSection.color || '#0891B2'}` }} />
 
         {/* Scan Line Effect */}
         <div
@@ -223,6 +246,7 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
 
         {/* Header: LOCATION */}
         <div
+          className="header-section"
           style={{
             display: 'flex',
             alignItems: 'center',
@@ -233,6 +257,7 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
           }}
         >
           <div
+            className="pulse-dot"
             style={{
               width: '8px',
               height: '8px',
@@ -257,6 +282,7 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
 
         {/* Section Icon and Label */}
         <div
+          className="content-section"
           style={{
             display: 'flex',
             alignItems: 'center',
