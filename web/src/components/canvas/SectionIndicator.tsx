@@ -266,8 +266,8 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             display: 'flex',
             alignItems: 'center',
             gap: '8px',
-            marginBottom: '8px',
-            paddingBottom: '8px',
+            marginBottom: isProjectSection ? '6px' : '8px',
+            paddingBottom: isProjectSection ? '6px' : '8px',
             borderBottom: '1px solid #0891B240',
           }}
         >
@@ -299,8 +299,8 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
           style={{
             display: 'flex',
             alignItems: 'center',
-            gap: '12px',
-            marginBottom: '8px',
+            gap: isProjectSection ? '10px' : '12px',
+            marginBottom: isProjectSection ? '0px' : '8px',
           }}
         >
           <div
