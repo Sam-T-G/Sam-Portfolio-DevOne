@@ -42,7 +42,7 @@ export default function CinematicProject({
   const glowRef = useRef<THREE.Mesh>(null!);
   const particlesRef = useRef<THREE.Points>(null!);
 
-  // Viewport-aware responsive positioning
+  // Responsive positioning for panel
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
@@ -227,17 +227,16 @@ export default function CinematicProject({
       {isActive && (
         <Html
           key={`panel-${isMobile ? 'mobile' : 'desktop'}`}
-          position={[0, isMobile ? -0.5 : -0.6, 0]}
-          center
-          transform
-          distanceFactor={isMobile ? 5 : 4.5}
+          position={[0, -1.2, 0]}
+          center={!isMobile}
+          distanceFactor={isMobile ? 8 : 6}
           zIndexRange={[100, 0]}
           style={{
             transition: 'opacity 0.5s cubic-bezier(0.4, 0, 0.2, 1), transform 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
             opacity: 1,
+            transform: isMobile ? 'translateX(-50%)' : 'scale(1)',
             pointerEvents: 'auto',
-            width: 'fit-content',
-            maxWidth: isMobile ? '85vw' : '70vw',
+            left: isMobile ? '50%' : 'auto',
           }}
         >
           <div
@@ -248,18 +247,17 @@ export default function CinematicProject({
               backdropFilter: 'blur(24px)',
               border: `4px solid ${project.color}`,
               borderRadius: '10px',
-              padding: isMobile ? '18px 14px' : '28px 36px',
-              minWidth: isMobile ? 'auto' : '480px',
-              maxWidth: isMobile ? '85vw' : '65vw',
-              width: isMobile ? '85vw' : 'clamp(480px, 55vw, 680px)',
+              padding: isMobile ? '20px 16px' : '32px 40px',
+              minWidth: isMobile ? 'auto' : '600px',
+              maxWidth: isMobile ? '95vw' : '850px',
+              width: isMobile ? '95vw' : '700px',
               boxShadow: `0 0 80px ${project.color}90, inset 0 0 40px ${project.color}25, 0 8px 30px #00000090`,
               fontFamily: '"Courier New", monospace',
               animation: 'borderPulse 2s ease-in-out infinite, slideInUp 0.5s cubic-bezier(0.4, 0, 0.2, 1)',
               cursor: project.link ? 'pointer' : 'default',
               transition: 'all 0.3s ease',
               boxSizing: 'border-box',
-              margin: '0 auto',
-              overflow: 'hidden',
+              margin: isMobile ? '0 auto 20px auto' : '0',
             }}
             onMouseEnter={(e) => {
               if (project.link) {
@@ -298,45 +296,30 @@ export default function CinematicProject({
               @media (max-width: 768px) {
                 div[style*="minWidth"] {
                   min-width: auto !important;
-                  max-width: 85vw !important;
-                  width: 85vw !important;
-                  padding: 18px 14px !important;
-                  margin: 0 auto !important;
+                  max-width: 95vw !important;
+                  width: 95vw !important;
+                  padding: 20px 16px !important;
+                  margin: 0 auto 20px auto !important;
                 }
                 
-                /* Responsive typography for mobile */
+                /* Optimize typography for mobile */
                 h2 {
-                  font-size: 22px !important;
-                  letter-spacing: 1.5px !important;
-                  margin: 6px 0 8px 0 !important;
+                  font-size: 26px !important;
+                  letter-spacing: 2.5px !important;
+                  margin: 8px 0 12px 0 !important;
                 }
                 
                 p {
-                  font-size: 12px !important;
-                  letter-spacing: 1px !important;
-                  margin-bottom: 12px !important;
-                  line-height: 1.4 !important;
+                  font-size: 13px !important;
+                  line-height: 1.6 !important;
+                  margin-bottom: 16px !important;
                 }
                 
-                /* Smaller project badge */
+                /* Compact badges on mobile */
                 div[style*="PROJECT"] {
-                  font-size: 9px !important;
-                  padding: 4px 10px !important;
-                  letter-spacing: 1.5px !important;
-                }
-                
-                /* Smaller tech tags */
-                div[style*="inline-block"] {
-                  font-size: 9px !important;
-                  padding: 5px 10px !important;
-                  margin: 3px 3px 3px 0 !important;
-                }
-              }
-              
-              @media (min-width: 769px) {
-                /* Desktop viewport containment */
-                div[style*="minWidth"] {
-                  max-width: 65vw !important;
+                  font-size: 10px !important;
+                  padding: 5px 12px !important;
+                  letter-spacing: 2px !important;
                 }
               }
               
@@ -369,10 +352,10 @@ export default function CinematicProject({
                 left: '28px',
                 background: project.color,
                 color: '#000000',
-                padding: '6px 16px',
-                fontSize: '12px',
+                padding: isMobile ? '5px 12px' : '6px 16px',
+                fontSize: isMobile ? '10px' : '12px',
                 fontWeight: 'bold',
-                letterSpacing: '2.5px',
+                letterSpacing: isMobile ? '2px' : '2.5px',
                 borderRadius: '3px',
                 boxShadow: `0 0 25px ${project.color}, 0 4px 15px ${project.color}80`,
               }}
@@ -384,10 +367,10 @@ export default function CinematicProject({
             <h2
               style={{
                 color: '#ffffff',
-                fontSize: '32px',
+                fontSize: isMobile ? '26px' : '32px',
                 fontWeight: 'bold',
-                margin: '10px 0 14px 0',
-                letterSpacing: '3.5px',
+                margin: isMobile ? '8px 0 12px 0' : '10px 0 14px 0',
+                letterSpacing: isMobile ? '2.5px' : '3.5px',
                 textTransform: 'uppercase',
                 textShadow: `0 0 25px ${project.color}70, 0 2px 10px #000000`,
               }}
@@ -399,9 +382,9 @@ export default function CinematicProject({
             <p
               style={{
                 color: project.color,
-                fontSize: '15px',
-                margin: '0 0 18px 0',
-                letterSpacing: '1.8px',
+                fontSize: isMobile ? '13px' : '15px',
+                margin: isMobile ? '0 0 14px 0' : '0 0 18px 0',
+                letterSpacing: isMobile ? '1.5px' : '1.8px',
                 textTransform: 'uppercase',
                 fontWeight: 'bold',
                 opacity: 1,
@@ -417,21 +400,21 @@ export default function CinematicProject({
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '8px',
+                  gap: isMobile ? '6px' : '8px',
                   background: `linear-gradient(135deg, ${project.color}30, ${project.color}15)`,
                   border: `2px solid ${project.color}`,
                   borderRadius: '6px',
-                  padding: '8px 16px',
-                  marginBottom: '16px',
+                  padding: isMobile ? '6px 12px' : '8px 16px',
+                  marginBottom: isMobile ? '12px' : '16px',
                   boxShadow: `0 0 20px ${project.color}40, inset 0 0 15px ${project.color}10`,
                 }}
               >
                 <span
                   style={{
                     color: '#ffffff',
-                    fontSize: '12px',
+                    fontSize: isMobile ? '11px' : '12px',
                     fontWeight: 'bold',
-                    letterSpacing: '1.5px',
+                    letterSpacing: isMobile ? '1.2px' : '1.5px',
                     textTransform: 'uppercase',
                     textShadow: `0 0 10px ${project.color}60`,
                   }}
@@ -455,9 +438,9 @@ export default function CinematicProject({
               <p
                 style={{
                   color: '#ffffff',
-                  fontSize: '14px',
-                  lineHeight: '1.7',
-                  margin: '0 0 20px 0',
+                  fontSize: isMobile ? '13px' : '14px',
+                  lineHeight: isMobile ? '1.6' : '1.7',
+                  margin: isMobile ? '0 0 16px 0' : '0 0 20px 0',
                   opacity: 0.95,
                   fontWeight: '500',
                   textShadow: '0 1px 3px #000000',
@@ -469,7 +452,7 @@ export default function CinematicProject({
 
             {/* Tags if available */}
             {project.tags && project.tags.length > 0 && (
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: isMobile ? '8px' : '10px', marginBottom: isMobile ? '16px' : '20px' }}>
                 {project.tags.map((tag, i) => (
                   <span
                     key={i}
@@ -477,9 +460,9 @@ export default function CinematicProject({
                       color: '#ffffff',
                       background: `${project.color}25`,
                       border: `2px solid ${project.color}80`,
-                      padding: '6px 12px',
-                      fontSize: '11px',
-                      letterSpacing: '1.2px',
+                      padding: isMobile ? '5px 10px' : '6px 12px',
+                      fontSize: isMobile ? '10px' : '11px',
+                      letterSpacing: isMobile ? '1px' : '1.2px',
                       borderRadius: '4px',
                       textTransform: 'uppercase',
                       fontWeight: 'bold',
@@ -500,28 +483,28 @@ export default function CinematicProject({
                 style={{
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '10px',
+                  gap: isMobile ? '8px' : '10px',
                   color: '#ffffff',
-                  fontSize: '12px',
-                  letterSpacing: '2px',
+                  fontSize: isMobile ? '10px' : '12px',
+                  letterSpacing: isMobile ? '1.5px' : '2px',
                   textTransform: 'uppercase',
                   fontWeight: 'bold',
-                  marginTop: '24px',
-                  paddingTop: '20px',
+                  marginTop: isMobile ? '16px' : '24px',
+                  paddingTop: isMobile ? '16px' : '20px',
                   borderTop: `2px solid ${project.color}60`,
                 }}
               >
                 <div
                   style={{
-                    width: '10px',
-                    height: '10px',
+                    width: isMobile ? '8px' : '10px',
+                    height: isMobile ? '8px' : '10px',
                     borderRadius: '50%',
                     backgroundColor: project.color,
                     boxShadow: `0 0 15px ${project.color}, 0 0 5px ${project.color}`,
                     animation: 'pulse 2s ease-in-out infinite',
                   }}
                 />
-                <span style={{ opacity: 0.9, textShadow: `0 0 10px ${project.color}40` }}>CLICK ANYWHERE TO VIEW PROJECT</span>
+                <span style={{ opacity: 0.9, textShadow: `0 0 10px ${project.color}40` }}>{isMobile ? 'TAP TO VIEW PROJECT' : 'CLICK ANYWHERE TO VIEW PROJECT'}</span>
               </div>
             )}
 
