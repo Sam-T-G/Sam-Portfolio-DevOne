@@ -71,11 +71,12 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
       className="section-indicator-responsive"
     >
       <style>{`
-        /* Mobile: Scale down by 20% for compact display */
+        /* Mobile: Scale down by 20% for compact display + reduce vertical spacing */
         @media (max-width: 768px) {
           .section-indicator-responsive .hud-container {
             transform: scale(0.8);
             transform-origin: top center;
+            margin-top: -8px;
           }
         }
         
