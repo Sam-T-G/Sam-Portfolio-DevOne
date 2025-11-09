@@ -7,7 +7,6 @@ import HUDManager from "@/components/canvas/HUDManager";
 import SectionIndicator from "@/components/canvas/SectionIndicator";
 import TimelineNavigation from "@/components/canvas/TimelineNavigation";
 import SwipeIndicator from "@/components/ui/SwipeIndicator";
-import ThemeToggle from "@/components/ThemeToggle";
 import { useMobileTouch } from "@/hooks/useMobileTouch";
 import { navigateToNextSection, navigateToPreviousSection } from "@/utils/sectionNavigation";
 
@@ -109,11 +108,6 @@ export default function Home() {
 
       {/* Timeline Navigation - Right Side */}
       <TimelineNavigation activeSection={activeSection} projects={projects} />
-
-      {/* Theme Toggle - Bottom Right */}
-      <div className="fixed bottom-6 right-6 z-50">
-        <ThemeToggle />
-      </div>
 
       {/* Mobile Swipe Indicator - Shows on first mobile visit */}
       <SwipeIndicator />

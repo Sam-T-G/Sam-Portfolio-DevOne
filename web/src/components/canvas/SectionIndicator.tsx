@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useState } from 'react';
+import ThemeToggle from '@/components/ThemeToggle';
 
 interface SectionIndicatorProps {
   activeSection: string;
@@ -288,10 +289,14 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
               fontWeight: 'bold',
               letterSpacing: '1.5px',
               opacity: 0.8,
+              flex: 1,
             }}
           >
             CURRENT LOCATION
           </span>
+          <div style={{ pointerEvents: 'auto' }}>
+            <ThemeToggle />
+          </div>
         </div>
 
         {/* Section Icon and Label */}

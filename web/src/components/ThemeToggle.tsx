@@ -52,7 +52,7 @@ export default function ThemeToggle() {
           opacity: theme === "light" ? 1 : 0,
         }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center text-zinc-800"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -83,7 +83,7 @@ export default function ThemeToggle() {
           opacity: theme === "dark" ? 1 : 0,
         }}
         transition={{ duration: 0.2 }}
-        className="absolute inset-0 flex items-center justify-center"
+        className="absolute inset-0 flex items-center justify-center text-zinc-200"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
