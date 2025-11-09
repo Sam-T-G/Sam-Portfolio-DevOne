@@ -149,7 +149,7 @@ export default function Home() {
             transition={{ duration: 0.5, delay: 0.2 }}
             className="mx-auto mb-12 max-w-2xl text-lg leading-relaxed text-[var(--charcoal)]"
           >
-            Computer Science student at Riverside City College with expertise in full-stack development, AI integration, and competitive programming. Research assistant exploring computational programming competition datasets and runtime optimization.
+            Computer Science student specializing in machine learning and full-stack development. Experience fine-tuning large language models (GPT-OSS 20B), building real-time communication systems with WebSocket architecture, and creating AI-powered applications with Google Gemini and Claude. Research assistant focused on computational optimization and algorithm analysis.
           </motion.p>
           
           <motion.div
