@@ -77,6 +77,24 @@ export default function SectionIndicator({ activeSection, projects = [] }: Secti
             transform: scale(0.8);
             transform-origin: top center;
             margin-top: -8px;
+            min-height: auto;
+            max-height: 90px;
+          }
+          
+          .section-indicator-responsive .section-label {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            line-height: 1.2;
+          }
+          
+          .section-indicator-responsive .section-subtitle {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+            line-height: 1.3;
           }
         }
         
